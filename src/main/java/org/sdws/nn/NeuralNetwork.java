@@ -21,7 +21,7 @@ public class NeuralNetwork {
         //this.networkLayers = new ArrayList<>(List.of(layers));
         this.layers = new ArrayList<>(List.of(layers));
         this.learningRate = 0.01f;
-        this.loss = 0f;
+        this.loss = Float.NaN;
         this.accuracy = 0f;
         this.output = null;
         for (Layer layer : this.networkLayers) {
@@ -63,7 +63,7 @@ public class NeuralNetwork {
     public void erase() {
         this.layers.clear();
         this.output = null;
-        this.loss = 0f;
+        this.loss = Float.NaN;
         this.learningRate = 0.01f;
         this.accuracy = 0f;
     }
