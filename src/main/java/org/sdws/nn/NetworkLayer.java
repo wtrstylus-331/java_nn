@@ -91,4 +91,14 @@ public class NetworkLayer {
         this.preActivationOutput = NArray.Mul(input, this.weights);
         this.preActivationOutput = NArray.Add(this.preActivationOutput, this.biases);
     }
+
+    @Override
+    public String toString() {
+        return "==========================\n" +
+                "Weights:\n" +
+                this.weights + "\n" +
+                "Biases:\n" +
+                this.biases + "\n" +
+                "==========================";
+    }
 }
