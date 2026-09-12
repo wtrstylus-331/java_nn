@@ -12,7 +12,7 @@ import java.util.Objects;
 public class NeuralNetwork {
     private final ArrayList<Layer> networkLayers = new ArrayList<>(1);
     private final ArrayList<NetworkLayer> layers;
-    private Object output;
+    public Object output;
     public float loss;
     public float learningRate;
     public float accuracy;
@@ -108,27 +108,27 @@ public class NeuralNetwork {
         }
     }
 
-    /**
-     * Returns the final output computed after the forward pass has been called for
-     * the neural network.
-     * @return a {@link NNArray} object that can represent either one of the following based
-     * on the implementation of the neural network:<br><br>
-     * - a 2-dimensional array in the instance of forward passing batches of vectors (1-dimensional arrays)
-     * into the neural network. Each index in the output {@link NNArray} corresponds to the index in the
-     * batch argument, a 2-dimensional array<br><br>
-     * - a 1-dimensional array representing a vector output after an entire forward pass from a single
-     * vector input of a {@link NNArray}<br><br>
-     * - an array with dimension and shape both being exactly {@code 1}, which in this instance can be
-     * represented as a {@code [x]}, where {@code x} is any real number of type {@link Float}
-     */
-    public NNArray output() {
-        if (this.networkLayers.isEmpty()) {
-            return null;
-        } else {
-            return (NNArray) this.output;
-            //return this.networkLayers.get(this.networkLayers.size() - 1).output;
-        }
-    }
+//    /**
+//     * Returns the final output computed after the forward pass has been called for
+//     * the neural network.
+//     * @return a {@link NNArray} object that can represent either one of the following based
+//     * on the implementation of the neural network:<br><br>
+//     * - a 2-dimensional array in the instance of forward passing batches of vectors (1-dimensional arrays)
+//     * into the neural network. Each index in the output {@link NNArray} corresponds to the index in the
+//     * batch argument, a 2-dimensional array<br><br>
+//     * - a 1-dimensional array representing a vector output after an entire forward pass from a single
+//     * vector input of a {@link NNArray}<br><br>
+//     * - an array with dimension and shape both being exactly {@code 1}, which in this instance can be
+//     * represented as a {@code [x]}, where {@code x} is any real number of type {@link Float}
+//     */
+//    public NNArray output() {
+//        if (this.networkLayers.isEmpty()) {
+//            return null;
+//        } else {
+//            return (NNArray) this.output;
+//            //return this.networkLayers.get(this.networkLayers.size() - 1).output;
+//        }
+//    }
 
     /**
      * Calculate the loss of the neural network based on vector outputs from single inputs, or
@@ -148,7 +148,7 @@ public class NeuralNetwork {
             default -> calculateMSE(desiredOutput);
         }
 
-        this.calculateAccuracy(desiredOutput, lossAlgorithm);
+        //this.calculateAccuracy(desiredOutput, lossAlgorithm);
     }
 
     /**
@@ -179,27 +179,30 @@ public class NeuralNetwork {
             throw new IllegalArgumentException("Desired output must be either 0.0 or 1.0.");
         }
 
-        if (((Number)this.output).getClass().equals(Float.class)) {
-            this.loss = desiredOutput.floatValue() *
-                    (float)Math.log(this.loss) + (1 - desiredOutput.floatValue()) * (float) Math.log(1 - this.loss);
-        } else if (((Number)this.output).getClass().equals(Double.class)) {
-            this.loss = (float) (desiredOutput.doubleValue() *
-                    Math.log(this.loss) + (1 - desiredOutput.doubleValue()) * Math.log(1 - this.loss));
-        } else if (((Number)this.output).getClass().equals(Integer.class)) {
-            this.loss = (desiredOutput.intValue() *
-                    (float)Math.log(this.loss) + (1 - desiredOutput.intValue()) * (float)Math.log(1 - this.loss));
-        } else if (((Number)this.output).getClass().equals(Long.class)) {
-            this.loss = (desiredOutput.longValue() *
-                    (float)Math.log(this.loss) + (1 - desiredOutput.longValue()) * (float)Math.log(1 - this.loss));
-        } else if (((Number)this.output).getClass().equals(Short.class)) {
-            this.loss = (desiredOutput.shortValue() *
-                    (float)Math.log(this.loss) + (1 - desiredOutput.shortValue()) * (float)Math.log(1 - this.loss));
-        } else if (((Number)this.output).getClass().equals(Byte.class)) {
-            this.loss = (desiredOutput.byteValue() *
-                    (float)Math.log(this.loss) + (1 - desiredOutput.byteValue()) * (float)Math.log(1 - this.loss));
-        } else {
-            throw new IllegalArgumentException("Cannot compute BCE Loss of a non-numeric value from the actual binary label argument.");
-        }
+        this.loss = desiredOutput.floatValue() * (float)Math.log(((Number) this.output).floatValue()) +
+                (1 - desiredOutput.floatValue()) * (float)Math.log(1 - ((Number) this.output).floatValue());
+
+//        if (((Number)this.output).getClass().equals(Float.class)) {
+//            this.loss = desiredOutput.floatValue() *
+//                    (float)Math.log(this.loss) + (1 - desiredOutput.floatValue()) * (float) Math.log(1 - this.loss);
+//        } else if (((Number)this.output).getClass().equals(Double.class)) {
+//            this.loss = (float) (desiredOutput.doubleValue() *
+//                    Math.log(this.loss) + (1 - desiredOutput.doubleValue()) * Math.log(1 - this.loss));
+//        } else if (((Number)this.output).getClass().equals(Integer.class)) {
+//            this.loss = (desiredOutput.intValue() *
+//                    (float)Math.log(this.loss) + (1 - desiredOutput.intValue()) * (float)Math.log(1 - this.loss));
+//        } else if (((Number)this.output).getClass().equals(Long.class)) {
+//            this.loss = (desiredOutput.longValue() *
+//                    (float)Math.log(this.loss) + (1 - desiredOutput.longValue()) * (float)Math.log(1 - this.loss));
+//        } else if (((Number)this.output).getClass().equals(Short.class)) {
+//            this.loss = (desiredOutput.shortValue() *
+//                    (float)Math.log(this.loss) + (1 - desiredOutput.shortValue()) * (float)Math.log(1 - this.loss));
+//        } else if (((Number)this.output).getClass().equals(Byte.class)) {
+//            this.loss = (desiredOutput.byteValue() *
+//                    (float)Math.log(this.loss) + (1 - desiredOutput.byteValue()) * (float)Math.log(1 - this.loss));
+//        } else {
+//            throw new IllegalArgumentException("Cannot compute BCE Loss of a non-numeric value from the actual binary label argument.");
+//        }
     }
 
     private void calculateBCE(NArray desiredOutput) {
@@ -669,79 +672,79 @@ public class NeuralNetwork {
 //        }
 //    }
 
-    private void accuracyFromCCE(NArray desiredOutput) {
-        if (((NArray)this.output).dimension == 1) {
-            Class<?> type = desiredOutput.get(0).getClass();
-            int desiredIndex;
-
-            if (type.equals(Float.class)) {
-                desiredIndex = desiredOutput.innerArray().indexOf((float)1);
-            } else if (type.equals(Double.class)) {
-                desiredIndex = desiredOutput.innerArray().indexOf((double) 1);
-            } else if (type.equals(Integer.class)) {
-                desiredIndex = desiredOutput.innerArray().indexOf(1);
-            } else if (type.equals(Long.class)) {
-                desiredIndex = desiredOutput.innerArray().indexOf(1L);
-            } else if (type.equals(Short.class)) {
-                desiredIndex = desiredOutput.innerArray().indexOf((short)1);
-            } else if (type.equals(Byte.class)) {
-                desiredIndex = desiredOutput.innerArray().indexOf((byte)1);
-            } else {
-                throw new IllegalArgumentException("Desired index for loss calculation (CCE) cannot be parsed from non-numeric type.");
-            }
-
-            int actualIndex = 0;
-            float max = Float.NEGATIVE_INFINITY;
-
-            for (int i = 0; i < ((NArray)this.output).innerArray().size(); i++) {
-                if (((NArray)this.output).get(i).floatValue() > max) {
-                    actualIndex = i;
-                    max = ((NArray)this.output).get(i).floatValue();
-                }
-            }
-
-            if (Objects.equals(actualIndex, desiredIndex)) {
-                this.accuracy = 1f;
-            } else {
-                this.accuracy = 0f;
-            }
-        } else {
-            int batches = (int)((NArray)this.output).shape.get(0);
-            int correct = 0;
-
-            for (int i = 0; i < (int)((NArray)this.output).shape.get(0); i++) {
-                int desiredIndex = ((ArrayList<Number>)desiredOutput.innerArray().get(i)).indexOf((float)1);
-
-                float max = Util.getMax((ArrayList<Number>) ((NArray)this.output).innerArray().get(i));
-                if (((ArrayList<Number>) ((NArray)this.output).innerArray().get(i)).indexOf(max) == desiredIndex) {
-                    correct++;
-                }
-            }
-
-            this.accuracy =  (float) correct / (float) batches;
-        }
-    }
-
-    private void accuracyFromBCE(NArray desiredOutput) {
-
-    }
-
-    private void accuracyFromRMSE(NArray desiredOutput) {
-
-    }
-
-    private void accuracyFromMSE(NArray desiredOutput) {
-
-    }
-
-    private void calculateAccuracy(NArray desiredOutput, LossAlgorithm lossAlg) {
-        switch (lossAlg) {
-            case CrossCatEntropy -> accuracyFromCCE(desiredOutput);
-            case BinaryCatEntropy -> accuracyFromBCE(desiredOutput);
-            case RootMeanSqErr ->  accuracyFromRMSE(desiredOutput);
-            default -> accuracyFromMSE(desiredOutput);
-        }
-    }
+//    private void accuracyFromCCE(NArray desiredOutput) {
+//        if (((NArray)this.output).dimension == 1) {
+//            Class<?> type = desiredOutput.get(0).getClass();
+//            int desiredIndex;
+//
+//            if (type.equals(Float.class)) {
+//                desiredIndex = desiredOutput.innerArray().indexOf((float)1);
+//            } else if (type.equals(Double.class)) {
+//                desiredIndex = desiredOutput.innerArray().indexOf((double) 1);
+//            } else if (type.equals(Integer.class)) {
+//                desiredIndex = desiredOutput.innerArray().indexOf(1);
+//            } else if (type.equals(Long.class)) {
+//                desiredIndex = desiredOutput.innerArray().indexOf(1L);
+//            } else if (type.equals(Short.class)) {
+//                desiredIndex = desiredOutput.innerArray().indexOf((short)1);
+//            } else if (type.equals(Byte.class)) {
+//                desiredIndex = desiredOutput.innerArray().indexOf((byte)1);
+//            } else {
+//                throw new IllegalArgumentException("Desired index for loss calculation (CCE) cannot be parsed from non-numeric type.");
+//            }
+//
+//            int actualIndex = 0;
+//            float max = Float.NEGATIVE_INFINITY;
+//
+//            for (int i = 0; i < ((NArray)this.output).innerArray().size(); i++) {
+//                if (((NArray)this.output).get(i).floatValue() > max) {
+//                    actualIndex = i;
+//                    max = ((NArray)this.output).get(i).floatValue();
+//                }
+//            }
+//
+//            if (Objects.equals(actualIndex, desiredIndex)) {
+//                this.accuracy = 1f;
+//            } else {
+//                this.accuracy = 0f;
+//            }
+//        } else {
+//            int batches = (int)((NArray)this.output).shape.get(0);
+//            int correct = 0;
+//
+//            for (int i = 0; i < (int)((NArray)this.output).shape.get(0); i++) {
+//                int desiredIndex = ((ArrayList<Number>)desiredOutput.innerArray().get(i)).indexOf((float)1);
+//
+//                float max = Util.getMax((ArrayList<Number>) ((NArray)this.output).innerArray().get(i));
+//                if (((ArrayList<Number>) ((NArray)this.output).innerArray().get(i)).indexOf(max) == desiredIndex) {
+//                    correct++;
+//                }
+//            }
+//
+//            this.accuracy =  (float) correct / (float) batches;
+//        }
+//    }
+//
+//    private void accuracyFromBCE(NArray desiredOutput) {
+//
+//    }
+//
+//    private void accuracyFromRMSE(NArray desiredOutput) {
+//
+//    }
+//
+//    private void accuracyFromMSE(NArray desiredOutput) {
+//
+//    }
+//
+//    private void calculateAccuracy(NArray desiredOutput, LossAlgorithm lossAlg) {
+//        switch (lossAlg) {
+//            case CrossCatEntropy -> accuracyFromCCE(desiredOutput);
+//            case BinaryCatEntropy -> accuracyFromBCE(desiredOutput);
+//            case RootMeanSqErr ->  accuracyFromRMSE(desiredOutput);
+//            default -> accuracyFromMSE(desiredOutput);
+//        }
+//    }
 
     private void calculateGradients() {
         for (int i = this.networkLayers.size() - 1; i >= 0; i--) {
