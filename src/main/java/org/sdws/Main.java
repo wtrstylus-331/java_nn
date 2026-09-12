@@ -105,7 +105,14 @@ public class Main {
         NArray<Float> testInput = NArray.CreateRandom(3);
         System.out.println("testInput: " + testInput);
 
+        NArray<Float> testOutput = NArray.FromElements(1f, 0f);
+
         network.feedForward(testInput);
+
+        System.out.println("loss: " + network.loss);
+        network.calculateLoss(testOutput, LossAlgorithm.CrossCatEntropy);
+
         System.out.println("nn output: " + network.output);
+        System.out.println("loss: " + network.loss);
     }
 }
