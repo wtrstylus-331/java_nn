@@ -261,19 +261,19 @@ public class NeuralNetwork {
                 this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
             } else if (type.equals(Double.class)) {
                 index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((double)1);
-                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).doubleValue());
+                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
             } else if  (type.equals(Integer.class)) {
                 index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf(1);
-                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).intValue());
+                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
             } else if (type.equals(Long.class)) {
                 index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((long)1);
-                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).longValue());
+                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
             } else if (type.equals(Short.class)) {
                 index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((short)1);
-                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).shortValue());
+                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
             } else if  (type.equals(Byte.class)) {
                 index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((byte)1);
-                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).byteValue());
+                this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
             } else {
                 throw new IllegalArgumentException("Cannot find one-hot element of a non-numeric type from desired output to calculate CCE loss.");
             }
@@ -297,19 +297,19 @@ public class NeuralNetwork {
                 float clippedValue;
 
                 if (type.equals(Float.class) ||  type.equals(Double.class)) {
-                    clippedValue = Util.clip(((NArray<Number>)this.output).get(i, innerArray.get(i).indexOf((float)1)));
+                    clippedValue = Util.clip(((NArray<Number>)this.output).get(i, innerArray.get(i).indexOf((float)1)).floatValue());
                     sum += (float) Math.log(clippedValue);
                 } else if (type.equals(Integer.class)) {
-                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf(1)));
+                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf(1)).floatValue());
                     sum += (float) Math.log(clippedValue);
                 } else if (type.equals(Long.class)) {
-                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf(1L)));
+                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf(1L)).floatValue());
                     sum += (float) Math.log(clippedValue);
                 } else if (type.equals(Short.class)) {
-                        clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf((short)1)));
-                        sum += (float) Math.log(clippedValue);
+                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf((short)1)).floatValue());
+                    sum += (float) Math.log(clippedValue);
                 } else if (type.equals(Byte.class)) {
-                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf((byte)1)));
+                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf((byte)1)).floatValue());
                     sum += (float) Math.log(clippedValue);
                 } else {
                     throw new IllegalArgumentException("Cannot find one-hot element of a non-numeric type from desired output to calculate CCE loss.");
@@ -362,19 +362,21 @@ public class NeuralNetwork {
             throw new IllegalStateException("Cannot compute MSE loss when neural network output is not of a numeric type.");
         }
 
-        if (((Number)this.output).getClass().equals(Float.class)) {
-            this.loss = (float)Math.pow((Float)this.output - desiredOutput.floatValue(), 2);
-        } else if (((Number)this.output).getClass().equals(Double.class)) {
-            this.loss = (float)Math.pow((Double) this.output - desiredOutput.doubleValue(), 2);
-        } else if (((Number)this.output).getClass().equals(Integer.class)) {
-            this.loss = (float)Math.pow((Integer) this.output - desiredOutput.intValue(), 2);
-        }  else if (((Number)this.output).getClass().equals(Long.class)) {
-            this.loss = (float)Math.pow((Long) this.output - desiredOutput.longValue(), 2);
-        }  else if (((Number)this.output).getClass().equals(Short.class)) {
-            this.loss = (float)Math.pow((Short) this.output - desiredOutput.shortValue(), 2);
-        }  else if (((Number)this.output).getClass().equals(Byte.class)) {
-            this.loss = (float)Math.pow((Byte) this.output - desiredOutput.byteValue(), 2);
-        }
+        this.loss = (float)Math.pow((Float)this.output - desiredOutput.floatValue(), 2);
+
+//        if (((Number)this.output).getClass().equals(Float.class)) {
+//            this.loss = (float)Math.pow((Float)this.output - desiredOutput.floatValue(), 2);
+//        } else if (((Number)this.output).getClass().equals(Double.class)) {
+//            this.loss = (float)Math.pow((Double) this.output - desiredOutput.doubleValue(), 2);
+//        } else if (((Number)this.output).getClass().equals(Integer.class)) {
+//            this.loss = (float)Math.pow((Integer) this.output - desiredOutput.intValue(), 2);
+//        }  else if (((Number)this.output).getClass().equals(Long.class)) {
+//            this.loss = (float)Math.pow((Long) this.output - desiredOutput.longValue(), 2);
+//        }  else if (((Number)this.output).getClass().equals(Short.class)) {
+//            this.loss = (float)Math.pow((Short) this.output - desiredOutput.shortValue(), 2);
+//        }  else if (((Number)this.output).getClass().equals(Byte.class)) {
+//            this.loss = (float)Math.pow((Byte) this.output - desiredOutput.byteValue(), 2);
+//        }
     }
 
     private void calculateMSE(NArray desiredOutput) {
@@ -389,21 +391,23 @@ public class NeuralNetwork {
             float sum = 0f;
 
             for (int i = 0; i < n; i++) {
-                if (type.equals(Integer.class)) {
-                    sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i) - (int)desiredOutput.get(i)), 2);
-                } else if (type.equals(Float.class)) {
-                    sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i) - (float)desiredOutput.get(i)), 2);
-                } else if (type.equals(Double.class)) {
-                    sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i) - (double)desiredOutput.get(i)), 2);
-                } else if (type.equals(Long.class)) {
-                    sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i) - (long)desiredOutput.get(i)), 2);
-                } else if (type.equals(Short.class)) {
-                    sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i) - (short)desiredOutput.get(i)), 2);
-                } else if (type.equals(Byte.class)) {
-                    sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i) - (byte)desiredOutput.get(i)), 2);
-                } else {
-                    throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output vector. (single output)");
-                }
+                sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i) - (float)desiredOutput.get(i)), 2);
+
+//                if (type.equals(Integer.class)) {
+//                    sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i) - (int)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Float.class)) {
+//                    sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i) - (float)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Double.class)) {
+//                    sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i) - (double)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Long.class)) {
+//                    sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i) - (long)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Short.class)) {
+//                    sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i) - (short)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Byte.class)) {
+//                    sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i) - (byte)desiredOutput.get(i)), 2);
+//                } else {
+//                    throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output vector. (single output)");
+//                }
             }
 
             this.loss = sum / n;
@@ -423,21 +427,23 @@ public class NeuralNetwork {
                 sum = 0f;
 
                 for (int j = 0; j < innerTotal; j++) {
-                    if (type.equals(Integer.class)) {
-                        sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i,j) - (int)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Float.class)) {
-                        sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i,j) - (float)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Double.class)) {
-                        sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i,j) - (double)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Long.class)) {
-                        sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i,j) - (long)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Short.class)) {
-                        sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i,j) - (short)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Byte.class)) {
-                        sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i,j) - (byte)desiredOutput.get(i,j)), 2);
-                    } else {
-                        throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output matrix. (batch output)");
-                    }
+                    sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i,j) - (float)desiredOutput.get(i,j)), 2);
+//
+//                    if (type.equals(Integer.class)) {
+//                        sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i,j) - (int)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Float.class)) {
+//                        sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i,j) - (float)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Double.class)) {
+//                        sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i,j) - (double)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Long.class)) {
+//                        sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i,j) - (long)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Short.class)) {
+//                        sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i,j) - (short)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Byte.class)) {
+//                        sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i,j) - (byte)desiredOutput.get(i,j)), 2);
+//                    } else {
+//                        throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output matrix. (batch output)");
+//                    }
                 }
 
                 batchSum += sum / innerTotal;
@@ -464,21 +470,23 @@ public class NeuralNetwork {
             float sum = 0f;
 
             for (int i = 0; i < n; i++) {
-                if (type.equals(Integer.class)) {
-                    sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i) - (int)desiredOutput.get(i)), 2);
-                } else if (type.equals(Float.class)) {
-                    sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i) - (float)desiredOutput.get(i)), 2);
-                } else if (type.equals(Double.class)) {
-                    sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i) - (double)desiredOutput.get(i)), 2);
-                } else if (type.equals(Long.class)) {
-                    sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i) - (long)desiredOutput.get(i)), 2);
-                } else if (type.equals(Short.class)) {
-                    sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i) - (short)desiredOutput.get(i)), 2);
-                } else if (type.equals(Byte.class)) {
-                    sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i) - (byte)desiredOutput.get(i)), 2);
-                } else {
-                    throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output vector. (single output)");
-                }
+                sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i) - (float)desiredOutput.get(i)), 2);
+//
+//                if (type.equals(Integer.class)) {
+//                    sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i) - (int)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Float.class)) {
+//                    sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i) - (float)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Double.class)) {
+//                    sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i) - (double)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Long.class)) {
+//                    sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i) - (long)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Short.class)) {
+//                    sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i) - (short)desiredOutput.get(i)), 2);
+//                } else if (type.equals(Byte.class)) {
+//                    sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i) - (byte)desiredOutput.get(i)), 2);
+//                } else {
+//                    throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output vector. (single output)");
+//                }
             }
 
             this.loss = (float) Math.sqrt(sum / n);
@@ -498,21 +506,22 @@ public class NeuralNetwork {
                 sum = 0f;
 
                 for (int j = 0; j < innerTotal; j++) {
-                    if (type.equals(Integer.class)) {
-                        sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i,j) - (int)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Float.class)) {
-                        sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i,j) - (float)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Double.class)) {
-                        sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i,j) - (double)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Long.class)) {
-                        sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i,j) - (long)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Short.class)) {
-                        sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i,j) - (short)desiredOutput.get(i,j)), 2);
-                    } else if (type.equals(Byte.class)) {
-                        sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i,j) - (byte)desiredOutput.get(i,j)), 2);
-                    } else {
-                        throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output matrix. (batch output)");
-                    }
+                    sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i,j) - (float)desiredOutput.get(i,j)), 2);
+//                    if (type.equals(Integer.class)) {
+//                        sum += (float) Math.pow(((int)((NArray<?>) this.output).get(i,j) - (int)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Float.class)) {
+//                        sum += (float) Math.pow(((float)((NArray<?>) this.output).get(i,j) - (float)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Double.class)) {
+//                        sum += (float) Math.pow(((double)((NArray<?>) this.output).get(i,j) - (double)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Long.class)) {
+//                        sum += (float) Math.pow(((long)((NArray<?>) this.output).get(i,j) - (long)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Short.class)) {
+//                        sum += (float) Math.pow(((short)((NArray<?>) this.output).get(i,j) - (short)desiredOutput.get(i,j)), 2);
+//                    } else if (type.equals(Byte.class)) {
+//                        sum += (float) Math.pow(((byte)((NArray<?>) this.output).get(i,j) - (byte)desiredOutput.get(i,j)), 2);
+//                    } else {
+//                        throw new IllegalArgumentException("Cannot compute MSE of non-numeric type from desired output matrix. (batch output)");
+//                    }
                 }
 
                 batchSum += (float) Math.sqrt(sum / innerTotal);
@@ -523,6 +532,10 @@ public class NeuralNetwork {
     }
 
     private boolean validforMSE(NArray desiredOutput) {
+        if (desiredOutput == null) {
+            throw new IllegalArgumentException("Desired output cannot be null for MSE.");
+        }
+
         if (desiredOutput.dimension == 1) {
             if (desiredOutput.innerArray().isEmpty()) {
                 throw new IllegalArgumentException("Desired output vector must not be empty. (single output)");
@@ -856,7 +869,7 @@ public class NeuralNetwork {
         private static boolean isOneHot(NArray input) {
             if (input.dimension == 1) {
                 int count = 0;
-                for (int i = 0; i < (int) input.shape.get(0); i++) {
+                for (int i = 0; i < input.innerArray().size(); i++) {
                     Class<?> type = input.get(0).getClass();
 
                     if (type.equals(Float.class)) {
@@ -889,8 +902,8 @@ public class NeuralNetwork {
                 return count == 1;
             } else {
                 int count = 0;
-                for (int i = 0; i < (int) input.shape.get(0); i++) {
-                    for (int j = 1; j < (int) input.shape.get(1); j++) {
+                for (int i = 0; i < input.innerArray().size(); i++) {
+                    for (int j = 1; j < ((ArrayList<Number>)input.innerArray().get(i)).size(); j++) {
                         Class<?> type = input.get(i, j).getClass();
 
                         if (type.equals(Float.class)) {
@@ -921,7 +934,7 @@ public class NeuralNetwork {
                     }
                 }
 
-                return count == (int) input.shape.get(0);
+                return count == input.innerArray().size();
             }
         }
 

@@ -95,9 +95,9 @@ public class Main {
         //System.out.println("tes2: " + tes2 + "\nshape: " +  tes2.shape);
         //testL.ForwardPass(tes2);
 
-        NetworkLayer first = new NetworkLayer(3,4, ActivationFunc.ReLU);
-        NetworkLayer second = new NetworkLayer(4,2, ActivationFunc.ReLU);
-        NetworkLayer softmax = new NetworkLayer(2, 2, ActivationFunc.Softmax);
+        NetworkLayer first = new NetworkLayer(3,6, ActivationFunc.ReLU);
+        NetworkLayer second = new NetworkLayer(6,4, ActivationFunc.ReLU);
+        NetworkLayer softmax = new NetworkLayer(4, 4, ActivationFunc.Softmax);
         NeuralNetwork network = new NeuralNetwork(
                 first, second, softmax
         );
@@ -105,7 +105,7 @@ public class Main {
         NArray<Float> testInput = NArray.CreateRandom(3);
         System.out.println("testInput: " + testInput);
 
-        NArray<Float> testOutput = NArray.FromElements(1f, 0f);
+        NArray<Float> testOutput = NArray.FromElements(0f, 0f, 0f, 1f);
 
         network.feedForward(testInput);
 
