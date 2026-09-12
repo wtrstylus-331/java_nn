@@ -80,7 +80,8 @@ public class Activation {
 
         ArrayList<?> list = (ArrayList<?>) input;
         Class<?> type = list.get(0).getClass();
-        Number max;
+        Number max = Float.NEGATIVE_INFINITY;
+        float sum = 0f;
 
         // determine max value within array to avoid overflow
         if (type.equals(Float.class)) {
@@ -95,6 +96,33 @@ public class Activation {
             max = Collections.max((ArrayList<Short>) list);
         } else if (type.equals(Byte.class)) {
             max = Collections.max((ArrayList<Byte>) list);
+        }
+
+        // subtract each elem by max
+        for (int i = 0; i < list.size(); i++) {
+            Object element = list.get(i);
+
+            if (element instanceof Number) {
+                ((ArrayList<Number>) list).set(i, ((float) ((ArrayList<Number>) list).get(i)) - max.floatValue());
+
+                float exponentiated = (float) Math.exp((float)((ArrayList<Number>) list).get(i));
+                ((ArrayList<Number>) list).set(i, exponentiated);
+                sum += exponentiated;
+            } else {
+                recurseSoftmaxAlgo(element);
+            }
+        }
+
+        // divide by sum
+        for (int i = 0; i < list.size(); i++) {
+            Object element = list.get(i);
+
+            if (element instanceof Number) {
+                //float finalVal = f.floatValue() / sum;
+                ((ArrayList<Number>) list).set(i, ((Number) element).floatValue() / sum); //Math.round(finalVal * 10000) / 10000f);
+            } else {
+                recurseSoftmaxAlgo(element);
+            }
         }
     }
 

@@ -97,11 +97,13 @@ public class Main {
 
         NetworkLayer first = new NetworkLayer(3,4, ActivationFunc.ReLU);
         NetworkLayer second = new NetworkLayer(4,2, ActivationFunc.ReLU);
+        NetworkLayer softmax = new NetworkLayer(2, 2, ActivationFunc.Softmax);
         NeuralNetwork network = new NeuralNetwork(
-                first, second
+                first, second, softmax
         );
 
         NArray<Float> testInput = NArray.CreateRandom(3);
+        System.out.println("testInput: " + testInput);
 
         network.feedForward(testInput);
         System.out.println("nn output: " + network.output);
