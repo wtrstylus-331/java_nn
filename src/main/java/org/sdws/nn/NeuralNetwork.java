@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class NeuralNetwork {
-    private final ArrayList<Layer> networkLayers = new ArrayList<>(1);
+    //private final ArrayList<Layer> networkLayers = new ArrayList<>(1);
     private final ArrayList<NetworkLayer> layers;
     public Object output;
     public float loss;
@@ -24,9 +24,9 @@ public class NeuralNetwork {
         this.loss = Float.NaN;
         this.accuracy = 0f;
         this.output = null;
-        for (Layer layer : this.networkLayers) {
-            System.out.println(layer.toString());
-        }
+//        for (Layer layer : this.networkLayers) {
+//            System.out.println(layer.toString());
+//        }
     }
 
     public void feedForward(NArray input) {
@@ -68,45 +68,45 @@ public class NeuralNetwork {
         this.accuracy = 0f;
     }
 
-    /**
-     * Performs one full pass of the provided {@code input} through the
-     * entire neural network, storing the final output either as a {@code Float}
-     * or {@link NNArray}, which can be accessed by referencing the {@code output}
-     * attribute of the last layer in this network.
-     * @param input the initial input to be taken by this network,
-     *              represented as a {@link NNArray} object.<br><br>
-     *              test
-     */
-    public void feedForward(NNArray input) {
-        if (input == null) {
-            return;
-        }
-
-        if (input.dimension == 1) { // output is either a vector or float
-            NNArray prevOutput = input;
-            for (Layer layer : this.networkLayers) {
-                layer.ForwardPass(prevOutput);
-                prevOutput = layer.postActivationOutput;
-            }
-
-            this.output = prevOutput;
-        } else if (input.dimension == 2) { // output is an NNArray where each index represents output for each corresponding input index
-            ArrayList<ArrayList<Float>> batch = (ArrayList<ArrayList<Float>>) input.nnarray();
-            ArrayList<ArrayList<Float>> batchOutput = new ArrayList<>();
-
-            for (ArrayList<Float> vec : batch) {
-                NNArray prevOutput = NNArray.create(vec);
-                for (Layer layer : this.networkLayers) {
-                    layer.ForwardPass(prevOutput);
-                    prevOutput = layer.postActivationOutput;
-                }
-
-                batchOutput.add((ArrayList<Float>) prevOutput.nnarray());
-            }
-
-            this.output = NNArray.create(batchOutput);
-        }
-    }
+//    /**
+//     * Performs one full pass of the provided {@code input} through the
+//     * entire neural network, storing the final output either as a {@code Float}
+//     * or {@link NNArray}, which can be accessed by referencing the {@code output}
+//     * attribute of the last layer in this network.
+//     * @param input the initial input to be taken by this network,
+//     *              represented as a {@link NNArray} object.<br><br>
+//     *              test
+//     */
+//    public void feedForward(NNArray input) {
+//        if (input == null) {
+//            return;
+//        }
+//
+//        if (input.dimension == 1) { // output is either a vector or float
+//            NNArray prevOutput = input;
+//            for (Layer layer : this.networkLayers) {
+//                layer.ForwardPass(prevOutput);
+//                prevOutput = layer.postActivationOutput;
+//            }
+//
+//            this.output = prevOutput;
+//        } else if (input.dimension == 2) { // output is an NNArray where each index represents output for each corresponding input index
+//            ArrayList<ArrayList<Float>> batch = (ArrayList<ArrayList<Float>>) input.nnarray();
+//            ArrayList<ArrayList<Float>> batchOutput = new ArrayList<>();
+//
+//            for (ArrayList<Float> vec : batch) {
+//                NNArray prevOutput = NNArray.create(vec);
+//                for (Layer layer : this.networkLayers) {
+//                    layer.ForwardPass(prevOutput);
+//                    prevOutput = layer.postActivationOutput;
+//                }
+//
+//                batchOutput.add((ArrayList<Float>) prevOutput.nnarray());
+//            }
+//
+//            this.output = NNArray.create(batchOutput);
+//        }
+//    }
 
 //    /**
 //     * Returns the final output computed after the forward pass has been called for
@@ -747,7 +747,7 @@ public class NeuralNetwork {
 //    }
 
     private void calculateGradients() {
-        for (int i = this.networkLayers.size() - 1; i >= 0; i--) {
+        for (int i = this.layers.size() - 1; i >= 0; i--) {
 
         }
     }
