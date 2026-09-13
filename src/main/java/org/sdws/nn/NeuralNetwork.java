@@ -211,9 +211,39 @@ public class NeuralNetwork {
         }
 
         if (desiredOutput.dimension == 1) {
+            if (!(((NArray) this.output).dimension == 1)) {
+                throw new IllegalArgumentException("Cannot calculate loss from output matrix when desired output is a vector.");
+            }
 
+            int n = desiredOutput.innerArray().size();
+            float total = 0f;
+
+            for (int i = 1; i < n; i++) {
+                total += desiredOutput.get(i).floatValue() * (float)Math.log(((NArray<Number>)this.output).get(i).floatValue()) +
+                        (1 - desiredOutput.get(i).floatValue()) * (float)Math.log(1 - ((NArray<Number>)this.output).get(i).floatValue());
+            }
+
+            this.loss = (-1f / n) * total;
         } else {
+            if (!(((NArray) this.output).dimension == 2)) {
+                throw new IllegalArgumentException("Cannot calculate loss from output vector when desired output is a matrix representing batches of outputs.");
+            }
 
+            int n = (int)desiredOutput.shape.get(1);
+            float batchesTotal = 0f;
+
+            for (int i = 1; i < desiredOutput.innerArray().size(); i++) {
+                float batchLoss = 0f;
+
+                for (int j = 1; j < n; j++) {
+                    batchLoss += desiredOutput.get(i,j).floatValue() * (float)Math.log(((NArray<Number>)this.output).get(i,j).floatValue()) +
+                            (1 - desiredOutput.get(i,j).floatValue()) * (float)Math.log(1 - ((NArray<Number>)this.output).get(i,j).floatValue());
+                }
+
+                batchesTotal += (-1f / n) * batchLoss;
+            }
+
+            this.loss = batchesTotal / ((float) desiredOutput.innerArray().size());
         }
     }
 
