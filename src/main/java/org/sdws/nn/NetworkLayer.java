@@ -1,6 +1,6 @@
 package org.sdws.nn;
 
-import org.sdws.mathematics.ActivationFunc;
+import org.sdws.util.ActivationFunc;
 import org.sdws.mathematics.Activation;
 import org.sdws.mathematics.NArray;
 import org.sdws.mathematics.NNArray;
