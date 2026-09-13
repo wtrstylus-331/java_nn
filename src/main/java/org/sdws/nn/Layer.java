@@ -1,7 +1,6 @@
 package org.sdws.nn;
 
-import org.sdws.mathematics.Activation;
-import org.sdws.mathematics.ActivationFunc;
+import org.sdws.util.ActivationFunc;
 import org.sdws.mathematics.NNArray;
 
 public class Layer {
@@ -75,13 +74,13 @@ public class Layer {
             return;
         }
 
-        switch (this.activation) {
-            case ReLU -> Activation.ReLU(this.postActivationOutput);
-            case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
-            case Step -> Activation.Step(this.postActivationOutput);
-            case Tanh -> Activation.Tanh(this.postActivationOutput);
-            case Softmax -> Activation.Softmax(this.postActivationOutput);
-        }
+//        switch (this.activation) {
+//            case ReLU -> Activation.ReLU(this.postActivationOutput);
+//            case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
+//            case Step -> Activation.Step(this.postActivationOutput);
+//            case Tanh -> Activation.Tanh(this.postActivationOutput);
+//            case Softmax -> Activation.Softmax(this.postActivationOutput);
+//        }
 
         System.out.println("\nOUTPUT (post): " + this.postActivationOutput+"\n");
     }
