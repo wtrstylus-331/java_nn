@@ -1,5 +1,6 @@
 package org.sdws.mathematics;
 
+import org.sdws.util.ActivationFunc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,10 +13,6 @@ public class Activation {
      * an input matrix in place by applying the ReLU function to each value in the matrix.
      * @param input a 'NNArray' object
      */
-    public static void ReLU(NNArray input) {
-        recurseWithFunction(input.nnarray(), ActivationFunc.ReLU);
-    }
-
     public static void ReLU(NArray input) {
         recurseAFunction(input.innerArray(), ActivationFunc.ReLU);
     }
@@ -27,9 +24,6 @@ public class Activation {
      * <p><code>1</code> / <code>(1 + Math.exp(-x))</code>, for any real number <code>x</code>.
      * @param input a 'NNArray' object
      */
-    public static void Sigmoid(NNArray input) {
-        recurseWithFunction(input.nnarray(), ActivationFunc.Sigmoid);
-    }
     public static void Sigmoid(NArray input) {
         recurseAFunction(input.innerArray(), ActivationFunc.Sigmoid);
     }
@@ -42,9 +36,6 @@ public class Activation {
      * <p><code>1</code> if x > 0
      * @param input a 'NNArray' object
      */
-    public static void Step(NNArray input) {
-        recurseWithFunction(input.nnarray(), ActivationFunc.Step);
-    }
     public static void Step(NArray input) {
         recurseAFunction(input.innerArray(), ActivationFunc.Step);
     }
@@ -54,9 +45,6 @@ public class Activation {
      * the hyperbolic tangent function to each input, resulting in
      * outputs ranging from {@code -1} to {@code}.
      */
-    public static void Tanh(NNArray input) {
-        recurseWithFunction(input.nnarray(), ActivationFunc.Tanh);
-    }
     public static void Tanh(NArray input) {
         recurseAFunction(input.innerArray(), ActivationFunc.Tanh);
     }
@@ -66,9 +54,6 @@ public class Activation {
      * represented via floats, by mutating the input matrix in place.
      * @param input a 'NNArray' object
      */
-    public static void Softmax(NNArray input) {
-        recurseSoftmax(input.nnarray());
-    }
     public static void Softmax(NArray input) {
         recurseSoftmaxAlgo(input.innerArray());
     }
@@ -118,63 +103,62 @@ public class Activation {
             Object element = list.get(i);
 
             if (element instanceof Number) {
-                //float finalVal = f.floatValue() / sum;
-                ((ArrayList<Number>) list).set(i, ((Number) element).floatValue() / sum); //Math.round(finalVal * 10000) / 10000f);
+                ((ArrayList<Number>) list).set(i, ((Number) element).floatValue() / sum);
             } else {
                 recurseSoftmaxAlgo(element);
             }
         }
     }
 
-    private static void recurseSoftmax(Object input) {
-        if (input instanceof Float) {
-            return;
-        }
-
-        List<?> list = (List<?>) input;
-        float sum = 0f;
-        float max = Float.NEGATIVE_INFINITY;
-
-        // determine max value within array to avoid overflow
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-
-            if (element instanceof Float f) {
-                if (f > max) {
-                    max = f;
-                }
-            } else {
-                recurseSoftmax(element);
-            }
-        }
-
-        // subtract values by max and exponentiate for softmax algo
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-
-            if (element instanceof Float) {
-                ((List<Float>) list).set(i, ((List<Float>) list).get(i) - max);
-
-                float exponentiated = (float) Math.exp(((List<Float>) list).get(i));
-                ((List<Float>) list).set(i, exponentiated);
-                sum += exponentiated;
-            } else {
-                recurseSoftmax(element);
-            }
-        }
-
-        // divide each value by accumulated sum for softmax algo
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-
-            if (element instanceof Float f) {
-                float finalVal = f / sum;
-                ((List<Float>) list).set(i, Math.round(finalVal * 10000) / 10000f);
-            } else {
-                recurseSoftmax(element);
-            }
-        }
-    }
+//    private static void recurseSoftmax(Object input) {
+//        if (input instanceof Float) {
+//            return;
+//        }
+//
+//        List<?> list = (List<?>) input;
+//        float sum = 0f;
+//        float max = Float.NEGATIVE_INFINITY;
+//
+//        // determine max value within array to avoid overflow
+//        for (int i = 0; i < list.size(); i++) {
+//            Object element = list.get(i);
+//
+//            if (element instanceof Float f) {
+//                if (f > max) {
+//                    max = f;
+//                }
+//            } else {
+//                recurseSoftmax(element);
+//            }
+//        }
+//
+//        // subtract values by max and exponentiate for softmax algo
+//        for (int i = 0; i < list.size(); i++) {
+//            Object element = list.get(i);
+//
+//            if (element instanceof Float) {
+//                ((List<Float>) list).set(i, ((List<Float>) list).get(i) - max);
+//
+//                float exponentiated = (float) Math.exp(((List<Float>) list).get(i));
+//                ((List<Float>) list).set(i, exponentiated);
+//                sum += exponentiated;
+//            } else {
+//                recurseSoftmax(element);
+//            }
+//        }
+//
+//        // divide each value by accumulated sum for softmax algo
+//        for (int i = 0; i < list.size(); i++) {
+//            Object element = list.get(i);
+//
+//            if (element instanceof Float f) {
+//                float finalVal = f / sum;
+//                ((List<Float>) list).set(i, Math.round(finalVal * 10000) / 10000f);
+//            } else {
+//                recurseSoftmax(element);
+//            }
+//        }
+//    }
 
     private static void recurseAFunction(Object input, ActivationFunc function) {
         if (input instanceof Number) {
@@ -251,43 +235,43 @@ public class Activation {
         }
     }
 
-    private static void recurseWithFunction(Object input, ActivationFunc activationFunction) {
-        if (input instanceof Float) {
-            return;
-        }
-
-        List<?> list = (List<?>) input;
-
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-
-            if (element instanceof Float f) {
-                switch (activationFunction) {
-                    case ReLU -> {
-                        float val = Math.round(((List<Float>) list).get(i) * 10000) / 10000f;
-                        ((List<Float>) list).set(i, Math.max(0, val));
-                    }
-                    case Sigmoid -> {
-                        float val = ((List<Float>) list).get(i);
-                        float output = (float) (1 / (1 + Math.exp(-val)));
-                        ((List<Float>) list).set(i, (float)Math.round(output * 10000) / 10000f);
-                    }
-                    case Step -> {
-                        if (f < 0f) {
-                            ((List<Float>) list).set(i, 0f);
-                        } else {
-                            ((List<Float>) list).set(i, 1f);
-                        }
-                    }
-                    case Tanh -> {
-                        float val = Math.round(((List<Float>) list).get(i) * 10000) / 10000f;
-                        float output = (float) ((Math.exp(val) - Math.exp(-val)) / (Math.exp(val) + Math.exp(-val)));
-                        ((List<Float>) list).set(i, output);
-                    }
-                }
-            } else {
-                recurseWithFunction(element, activationFunction);
-            }
-        }
-    }
+//    private static void recurseWithFunction(Object input, ActivationFunc activationFunction) {
+//        if (input instanceof Float) {
+//            return;
+//        }
+//
+//        List<?> list = (List<?>) input;
+//
+//        for (int i = 0; i < list.size(); i++) {
+//            Object element = list.get(i);
+//
+//            if (element instanceof Float f) {
+//                switch (activationFunction) {
+//                    case ReLU -> {
+//                        float val = Math.round(((List<Float>) list).get(i) * 10000) / 10000f;
+//                        ((List<Float>) list).set(i, Math.max(0, val));
+//                    }
+//                    case Sigmoid -> {
+//                        float val = ((List<Float>) list).get(i);
+//                        float output = (float) (1 / (1 + Math.exp(-val)));
+//                        ((List<Float>) list).set(i, (float)Math.round(output * 10000) / 10000f);
+//                    }
+//                    case Step -> {
+//                        if (f < 0f) {
+//                            ((List<Float>) list).set(i, 0f);
+//                        } else {
+//                            ((List<Float>) list).set(i, 1f);
+//                        }
+//                    }
+//                    case Tanh -> {
+//                        float val = Math.round(((List<Float>) list).get(i) * 10000) / 10000f;
+//                        float output = (float) ((Math.exp(val) - Math.exp(-val)) / (Math.exp(val) + Math.exp(-val)));
+//                        ((List<Float>) list).set(i, output);
+//                    }
+//                }
+//            } else {
+//                recurseWithFunction(element, activationFunction);
+//            }
+//        }
+//    }
 }
