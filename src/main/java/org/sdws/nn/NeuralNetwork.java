@@ -3,7 +3,6 @@ package org.sdws.nn;
 import org.sdws.util.ActivationFunc;
 import org.sdws.util.LossAlgorithm;
 import org.sdws.mathematics.NArray;
-import org.sdws.mathematics.NNArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,21 +11,51 @@ import java.util.Objects;
 public class NeuralNetwork {
     //private final ArrayList<Layer> networkLayers = new ArrayList<>(1);
     private final ArrayList<NetworkLayer> layers;
+    private LossAlgorithm lossAlgorithm;
     public Object output;
-    public float loss;
-    public float learningRate;
-    public float accuracy;
+    private float loss;
+    private float learningRate;
 
     public NeuralNetwork(NetworkLayer... layers) {
         //this.networkLayers = new ArrayList<>(List.of(layers));
         this.layers = new ArrayList<>(List.of(layers));
         this.learningRate = 0.01f;
         this.loss = Float.NaN;
-        this.accuracy = 0f;
+        this.lossAlgorithm = LossAlgorithm.CCELoss;
+//        this.accuracy = 0f;
         this.output = null;
 //        for (Layer layer : this.networkLayers) {
 //            System.out.println(layer.toString());
 //        }
+    }
+
+    public NeuralNetwork(float learningRate, LossAlgorithm lossAlg, NetworkLayer... layers) {
+        //this.networkLayers = new ArrayList<>(List.of(layers));
+        this.layers = new ArrayList<>(List.of(layers));
+        this.learningRate = learningRate;
+        this.loss = Float.NaN;
+        this.lossAlgorithm = lossAlg;
+        this.output = null;
+    }
+
+    public void setLearningRate(float learningRate) {
+        this.learningRate = learningRate;
+    }
+
+    public float learningRate() {
+        return this.learningRate;
+    }
+
+    public void setLoss(LossAlgorithm lossAlgorithm) {
+        this.lossAlgorithm = lossAlgorithm;
+    }
+
+    public LossAlgorithm lossAlgorithm() {
+        return this.lossAlgorithm;
+    }
+
+    public float loss() {
+        return this.loss;
     }
 
     public void feedForward(NArray input) {
@@ -37,7 +66,7 @@ public class NeuralNetwork {
         if (input.dimension == 1) {
             NArray prevOutput = input;
             for (NetworkLayer layer : this.layers) {
-                layer.ForwardPass(prevOutput);
+                layer.forwardPass(prevOutput);
                 prevOutput = layer.postActivationOutput;
             }
 
@@ -49,7 +78,7 @@ public class NeuralNetwork {
             for (ArrayList<Number> vec : batch) {
                 NArray prevOutput = NArray.FromCollection(vec);
                 for (NetworkLayer layer : this.layers) {
-                    layer.ForwardPass(prevOutput);
+                    layer.forwardPass(prevOutput);
                     prevOutput = layer.postActivationOutput;
                 }
 
@@ -65,70 +94,9 @@ public class NeuralNetwork {
         this.output = null;
         this.loss = Float.NaN;
         this.learningRate = 0.01f;
-        this.accuracy = 0f;
+        this.lossAlgorithm = null;
+//        this.accuracy = 0f;
     }
-
-//    /**
-//     * Performs one full pass of the provided {@code input} through the
-//     * entire neural network, storing the final output either as a {@code Float}
-//     * or {@link NNArray}, which can be accessed by referencing the {@code output}
-//     * attribute of the last layer in this network.
-//     * @param input the initial input to be taken by this network,
-//     *              represented as a {@link NNArray} object.<br><br>
-//     *              test
-//     */
-//    public void feedForward(NNArray input) {
-//        if (input == null) {
-//            return;
-//        }
-//
-//        if (input.dimension == 1) { // output is either a vector or float
-//            NNArray prevOutput = input;
-//            for (Layer layer : this.networkLayers) {
-//                layer.ForwardPass(prevOutput);
-//                prevOutput = layer.postActivationOutput;
-//            }
-//
-//            this.output = prevOutput;
-//        } else if (input.dimension == 2) { // output is an NNArray where each index represents output for each corresponding input index
-//            ArrayList<ArrayList<Float>> batch = (ArrayList<ArrayList<Float>>) input.nnarray();
-//            ArrayList<ArrayList<Float>> batchOutput = new ArrayList<>();
-//
-//            for (ArrayList<Float> vec : batch) {
-//                NNArray prevOutput = NNArray.create(vec);
-//                for (Layer layer : this.networkLayers) {
-//                    layer.ForwardPass(prevOutput);
-//                    prevOutput = layer.postActivationOutput;
-//                }
-//
-//                batchOutput.add((ArrayList<Float>) prevOutput.nnarray());
-//            }
-//
-//            this.output = NNArray.create(batchOutput);
-//        }
-//    }
-
-//    /**
-//     * Returns the final output computed after the forward pass has been called for
-//     * the neural network.
-//     * @return a {@link NNArray} object that can represent either one of the following based
-//     * on the implementation of the neural network:<br><br>
-//     * - a 2-dimensional array in the instance of forward passing batches of vectors (1-dimensional arrays)
-//     * into the neural network. Each index in the output {@link NNArray} corresponds to the index in the
-//     * batch argument, a 2-dimensional array<br><br>
-//     * - a 1-dimensional array representing a vector output after an entire forward pass from a single
-//     * vector input of a {@link NNArray}<br><br>
-//     * - an array with dimension and shape both being exactly {@code 1}, which in this instance can be
-//     * represented as a {@code [x]}, where {@code x} is any real number of type {@link Float}
-//     */
-//    public NNArray output() {
-//        if (this.networkLayers.isEmpty()) {
-//            return null;
-//        } else {
-//            return (NNArray) this.output;
-//            //return this.networkLayers.get(this.networkLayers.size() - 1).output;
-//        }
-//    }
 
     /**
      * Calculate the loss of the neural network based on vector outputs from single inputs, or
@@ -257,22 +225,6 @@ public class NeuralNetwork {
         }
 
         this.loss = -desiredOutput.floatValue() * (float) Math.log((Float)this.output);
-
-//        if (((Number)this.output).getClass().equals(Float.class)) {
-//            this.loss = -desiredOutput.floatValue() * (float) Math.log((Float)this.output);
-//        } else if (((Number)this.output).getClass().equals(Double.class)) {
-//            this.loss = -desiredOutput.floatValue() * (float) Math.log((Float)this.output);
-//        } else if (((Number)this.output).getClass().equals(Integer.class)) {
-//            this.loss = -desiredOutput.intValue() * (float) Math.log((Float)this.output);
-//        } else if (((Number)this.output).getClass().equals(Long.class)) {
-//            this.loss = -desiredOutput.longValue() * (float) Math.log((Float)this.output);
-//        } else if (((Number)this.output).getClass().equals(Short.class)) {
-//            this.loss = -desiredOutput.shortValue() * (float) Math.log((Float)this.output);
-//        } else if (((Number)this.output).getClass().equals(Byte.class)) {
-//            this.loss = -desiredOutput.byteValue() * (float) Math.log((Float)this.output);
-//        } else {
-//            throw new IllegalArgumentException("Cannot compute CCE Loss of a non-numeric value.");
-//        }
     }
 
     private void calculateCCE(NArray desiredOutput) {
@@ -622,7 +574,12 @@ public class NeuralNetwork {
 
     private void calculateGradients() {
         for (int i = this.layers.size() - 1; i >= 0; i--) {
+            switch (this.layers.get(i).activation) {
+                default: continue;
+                case Softmax: {
 
+                }
+            }
         }
     }
 
