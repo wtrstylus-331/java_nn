@@ -20,8 +20,6 @@ public class Main {
         NArray<Float> testInput = NArray.CreateRandom(3);
         System.out.println("testInput: " + testInput);
 
-        NArray<Float> batchInput = NArray.CreateRandom(4,3);
-
         NArray<Float> testOutput = NArray.FromElements(0f, 0f, 0f, 1f);
 
         NArray<Float> batchOutput = NArray.FromRows(
@@ -31,8 +29,20 @@ public class Main {
                 List.of(1f, 0f, 0f, 0f)
         );
 
-        network.feedForward(batchInput);
-        network.calculateLoss(batchOutput, LossAlgorithm.CCELoss);
-        System.out.println("loss: " + network.loss);
+
+        //network.calculateLoss(batchOutput, LossAlgorithm.CCELoss);
+        //System.out.println("loss: " + network.loss);
+
+        float avgLoss = 0f;
+        int iterations = 100;
+        for (int i = 0; i < iterations; i++) {
+            NArray<Float> batchInput = NArray.CreateRandom(4,3);
+            network.feedForward(batchInput);
+            network.calculateLoss(batchOutput, LossAlgorithm.CCELoss);
+            System.out.println("loss: " + network.loss);
+            avgLoss += network.loss;
+        }
+
+        System.out.println("avgLoss: " + avgLoss/iterations);
     }
 }
