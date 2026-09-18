@@ -470,7 +470,11 @@ public class NArray<E extends Number> {
                 return NArray.matrixProduct(array1, array2);
             }
         } else { // matrix * vec product under certain circumstances
-            return NArray.matrixVecProduct(array1, array2);
+            if (array1.dimension == 1) {
+                return NArray.matrixVecProduct(array2, array1);
+            } else {
+                return NArray.matrixVecProduct(array1, array2);
+            }
         }
     }
 
@@ -701,55 +705,91 @@ public class NArray<E extends Number> {
         return new NArray<>(result);
     }
 
-    private static <E extends Number> NArray<E> matrixVecProduct(NArray<E> array1, NArray<E> array2) {
-        if (array1 == null || array2 == null) {
-            return null;
+    private static <E extends Number> NArray<E> matrixVecProduct(NArray<E> matrix, NArray<E> vector) {
+        if (matrix.dimension != 2 || vector.dimension != 1) {
+            throw new IllegalArgumentException("matrixVecProduct requires (matrix × vector).");
         }
 
-        NArray<E> matrixRef, vecRef;
+        int rows = matrix.shape.get(0);
+        int cols = matrix.shape.get(1);
 
-        if (array1.dimension == 1) {
-            vecRef = array1;
-            matrixRef = array2;
-        } else {
-            vecRef = array2;
-            matrixRef = array1;
+        System.out.println("rows: " + rows + " cols: " + cols);
+
+        int vectorLength = vector.shape.get(1);
+
+        System.out.println("vectorLength: " + vectorLength);
+
+        if (vectorLength != cols) {
+            throw new IllegalArgumentException("Vector length must match matrix columns.");
         }
 
-        if (matrixRef.shape.get(1) > 1 && Objects.equals(matrixRef.shape.get(1), vecRef.shape.get(1))) {
-            // vec length equals matrix columns
-            ArrayList<E> result = new ArrayList<>(matrixRef.shape.get(0));
+        ArrayList<E> result = new ArrayList<>(rows);
 
-            for (int i = 0; i < matrixRef.shape.get(0); i++) {
-                Number sum = 0;
-                for (int j = 0; j < matrixRef.shape.get(1); j++) {
-                    sum = NArray.mulNumsAccumulate(matrixRef.get(i, j), vecRef.get(j), sum);
-                }
-                result.add((E) sum);
+        for (int i = 0; i < rows; i++) {
+            float sum = 0f;
+            for (int j = 0; j < cols; j++) {
+                sum += matrix.get(i, j).floatValue() * vector.get(j).floatValue();
             }
-
-            return new NArray<>(result);
+            result.add((E)(Number)sum);
         }
 
-        if (matrixRef.shape.get(1) == 1 && Objects.equals(matrixRef.shape.get(1), vecRef.shape.get(0))) {
-            // single column matrix * vec
-            ArrayList<ArrayList<E>> result = new ArrayList<>(matrixRef.shape.get(0));
-
-            for (int i = 0; i < matrixRef.shape.get(0); i++) {
-                ArrayList<E> row = new ArrayList<>(vecRef.shape.get(1));
-                for (int j = 0; j < vecRef.shape.get(1); j++) {
-                    row.add(NArray.mulNums(matrixRef.get(i, 0), vecRef.get(j)));
-                }
-                result.add(row);
-            }
-
-            return new NArray<>(result);
-        }
-
-        throw new IllegalArgumentException(
-                "Vector length and matrix columns must match for multiplication of matrix and vector."
-        );
+        return new NArray<>(result);
     }
+
+
+//    private static <E extends Number> NArray<E> matrixVecProduct(NArray<E> array1, NArray<E> array2) {
+//        if (array1 == null || array2 == null) {
+//            return null;
+//        }
+//
+//        if (array1.dimension == 1 && array2.dimension == 2) {
+//
+//        }
+//
+//        NArray<E> matrixRef, vecRef;
+//
+//        if (array1.dimension == 1) {
+//            vecRef = array1;
+//            matrixRef = array2;
+//        } else {
+//            vecRef = array2;
+//            matrixRef = array1;
+//        }
+//
+//        if (matrixRef.shape.get(1) > 1 && Objects.equals(matrixRef.shape.get(1), vecRef.shape.get(1))) {
+//            // vec length equals matrix columns
+//            ArrayList<E> result = new ArrayList<>(matrixRef.shape.get(0));
+//
+//            for (int i = 0; i < matrixRef.shape.get(0); i++) {
+//                Number sum = 0;
+//                for (int j = 0; j < matrixRef.shape.get(1); j++) {
+//                    sum = NArray.mulNumsAccumulate(matrixRef.get(i, j), vecRef.get(j), sum);
+//                }
+//                result.add((E) sum);
+//            }
+//
+//            return new NArray<>(result);
+//        }
+//
+//        if (matrixRef.shape.get(1) == 1 && Objects.equals(matrixRef.shape.get(1), vecRef.shape.get(0))) {
+//            // single column matrix * vec
+//            ArrayList<ArrayList<E>> result = new ArrayList<>(matrixRef.shape.get(0));
+//
+//            for (int i = 0; i < matrixRef.shape.get(0); i++) {
+//                ArrayList<E> row = new ArrayList<>(vecRef.shape.get(1));
+//                for (int j = 0; j < vecRef.shape.get(1); j++) {
+//                    row.add(NArray.mulNums(matrixRef.get(i, 0), vecRef.get(j)));
+//                }
+//                result.add(row);
+//            }
+//
+//            return new NArray<>(result);
+//        }
+//
+//        throw new IllegalArgumentException(
+//                "Vector length and matrix columns must match for multiplication of matrix and vector."
+//        );
+//    }
 
     private static <E extends Number> E addNums(E a, E b) {
         Class<?> numType = a.getClass();
