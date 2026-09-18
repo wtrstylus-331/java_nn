@@ -5,7 +5,7 @@ package org.sdws.util;
  */
 public enum ActivationFunc {
     /**
-     * Rectified linear unit.
+     * Rectified linear unit, essentially {@code max(0,x)}.
      */
     ReLU,
 
@@ -21,18 +21,12 @@ public enum ActivationFunc {
     Step,
 
     /**
-     * Use the hyperbolic tangent function to map inputs between a range
-     * of {@code -1} to {@code 1}.
-     */
-    Tanh,
-
-    /**
      * No activation function.
      */
     None,
 
     /**
-     * Normalize vector elements via Gaussian distribution.
+     * Normalize output elements into 'probabilities' via Gaussian distribution.
      */
     Softmax
 }
