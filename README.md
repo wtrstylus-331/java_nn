@@ -75,5 +75,5 @@ System.out.println("loss: " + network.loss() + " output: " + network.output);
 >> loss: 0.43976375 output: [0.35581148, 0.6441886]
 ```
 (note that the weights are always randomly generated when creating new layers, so every time you run the program the loss and output will be completely random, until backpropagation and descent opimization is implemented that is)
-<br>
-Open to contributors for implementation of various remaining aspects of Neural Networks.
+<br><br>
+### Contributions regarding the implementation of various remaining aspects of this library are always welcome.
