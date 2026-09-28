@@ -34,7 +34,7 @@ It is important that the # of neurons of the **i-1**th layer is equivalent to th
 ```
 NetworkLayer first = new NetworkLayer(3,6, ActivationFunc.ReLU); // this layer takes in 3 inputs and has 6 neurons (outputs)
 NetworkLayer second = new NetworkLayer(6,2, ActivationFunc.ReLU); // this layer takes in 6 inputs and has 2 neurons (outputs)
-NetworkLayer softmax = new NetworkLayer(2, 2, ActivationFunc.Softmax); // this layer takes in 2 inputs and has 2 neurons (outputs)
+NetworkLayer softmax = new NetworkLayer(2,2, ActivationFunc.Softmax); // this layer takes in 2 inputs and has 2 neurons (outputs)
 ```
 <br>
 
