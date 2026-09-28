@@ -25,5 +25,57 @@ The current architecture of this library is constantly changing to accommodate f
 - **_ActivationFunc_** & **_LossAlgorithm_** are enums containing the currently implemented activation functions and loss calculation algorithms, which are mentioned and used in various methods for the previous classes
 
 # Playing around with it
-git clone https://github.com/wtrstylus-331/java_nn.git
-cd java_nn
+clone via git or GitHub desktop
+
+### Example usage
+```
+// first we create three layers
+
+NetworkLayer first = new NetworkLayer(3,6, ActivationFunc.ReLU); // this layer takes in 3 inputs and has 6 neurons (outputs)
+NetworkLayer second = new NetworkLayer(6,2, ActivationFunc.ReLU); // this layer takes in 6 inputs and has 2 neurons (outputs)
+NetworkLayer softmax = new NetworkLayer(2, 2, ActivationFunc.Softmax); // this layer takes in 2 inputs and has 2 neurons (outputs)
+
+/*
+  it is important that the # of neurons of the i-1th layer is equivalent
+  to the input argument for the ith layer (except for the first layer)
+*/
+
+
+// we now create a new network object
+
+NeuralNetwork network = new NeuralNetwork(
+        0.01f, // learning rate
+        LossAlgorithm.CCELoss, // loss algorithm via enum
+        first, second, softmax // layer arguments
+);
+
+/*
+  the third parameter for the NeuralNetwork class is a varargs parameter,
+  thus you can add as many layers as possible
+*/
+
+// Now create an input vector of size 3 for the 3 inputs of the first layer
+
+NArray<Float> testInput = NArray.CreateRandom(3);
+
+// And also create the desired output of size 2 since there are 2 neurons in the output layer
+
+NArray<Float> testOutput = NArray.FromElements(0f, 1f);
+
+/*
+  in this case, since our loss algorithm is CCE, the desired output is one-hot encoded,
+  (which is a must)
+*/
+
+// Now we call the feedForward method, passing in our input,
+// and calculate the loss obtained by the neural network in comparison
+// to our desired output
+
+network.feedForward(testInput);
+network.calculateLoss(testOutput);
+System.out.println("loss: " + network.loss() + " output: " + network.output);
+
+>> loss: 0.43976375 output: [0.35581148, 0.6441886]
+(note that the weights are always randomly generated when creating new layers,
+so this is just an example output of what the print statement would look like)
+```
