@@ -25,7 +25,8 @@ The current architecture of this library is constantly changing to accommodate f
 - **_ActivationFunc_** & **_LossAlgorithm_** are enums containing the currently implemented activation functions and loss calculation algorithms, which are mentioned and used in various methods for the previous classes
 
 # Playing around with it
-clone via git or GitHub desktop
+1. Clone via git or GitHub desktop
+2. Check out the example usage below by editing the **_Main_** class
 
 ### Example usage
 ```
