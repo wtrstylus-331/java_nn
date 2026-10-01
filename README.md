@@ -10,6 +10,7 @@
 - Implement gradient descent algorithms for various loss functions for the backpropagation process
 - Optimizers for gradient descent
 - Loops for training NN's upon implementation of the previous bullet points
+- Potential new set of classes for visualizing neural network processes (via JavaFX)
 - As usual, proper documentation for methods/functions
 
 ### Use cases
