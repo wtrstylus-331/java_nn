@@ -18,7 +18,7 @@ public class NeuralNetwork {
 
     public NeuralNetwork(NetworkLayer... layers) {
         //this.networkLayers = new ArrayList<>(List.of(layers));
-        this.layers = new ArrayList<>(List.of(layers));
+        this.layers = new ArrayList<>();
         this.learningRate = 0.01f;
         this.loss = Float.NaN;
         this.lossAlgorithm = LossAlgorithm.CCELoss;
@@ -27,15 +27,65 @@ public class NeuralNetwork {
 //        for (Layer layer : this.networkLayers) {
 //            System.out.println(layer.toString());
 //        }
+
+        if (layers.length == 1) {
+            this.layers.add(layers[0]);
+        } else if (layers.length == 2) {
+            this.layers.add(layers[0]);
+            this.layers.add(layers[1]);
+
+            this.layers.get(0).nextLayer = this.layers.get(1);
+            this.layers.get(1).prevLayer = this.layers.get(0);
+        } else {
+            for (int i = 0; i < layers.length; i++) {
+                NetworkLayer layer = layers[i];
+
+                if (i == 0) {
+                    layer.nextLayer = layers[i + 1];
+                } else if (i == layers.length - 1) {
+                    layer.prevLayer = layers[i - 1];
+                } else {
+                    layer.prevLayer = layers[i - 1];
+                    layer.nextLayer = layers[i + 1];
+                }
+
+                this.layers.add(layer);
+            }
+        }
     }
 
     public NeuralNetwork(float learningRate, LossAlgorithm lossAlg, NetworkLayer... layers) {
         //this.networkLayers = new ArrayList<>(List.of(layers));
-        this.layers = new ArrayList<>(List.of(layers));
+        this.layers = new ArrayList<>();
         this.learningRate = learningRate;
         this.loss = Float.NaN;
         this.lossAlgorithm = lossAlg;
         this.output = null;
+
+        if (layers.length == 1) {
+            this.layers.add(layers[0]);
+        } else if (layers.length == 2) {
+            this.layers.add(layers[0]);
+            this.layers.add(layers[1]);
+
+            this.layers.get(0).nextLayer = this.layers.get(1);
+            this.layers.get(1).prevLayer = this.layers.get(0);
+        } else {
+            for (int i = 0; i < layers.length; i++) {
+                NetworkLayer layer = layers[i];
+
+                if (i == 0) {
+                    layer.nextLayer = layers[i + 1];
+                } else if (i == layers.length - 1) {
+                    layer.prevLayer = layers[i - 1];
+                } else {
+                    layer.prevLayer = layers[i - 1];
+                    layer.nextLayer = layers[i + 1];
+                }
+
+                this.layers.add(layer);
+            }
+        }
     }
 
     public void setLearningRate(float learningRate) {
@@ -66,7 +116,7 @@ public class NeuralNetwork {
         if (input.dimension == 1) {
             NArray prevOutput = input;
             for (NetworkLayer layer : this.layers) {
-                layer.forwardPass(prevOutput);
+                layer.ForwardPass(prevOutput);
                 prevOutput = layer.postActivationOutput;
             }
 
@@ -78,7 +128,7 @@ public class NeuralNetwork {
             for (ArrayList<Number> vec : batch) {
                 NArray prevOutput = NArray.FromCollection(vec);
                 for (NetworkLayer layer : this.layers) {
-                    layer.forwardPass(prevOutput);
+                    layer.ForwardPass(prevOutput);
                     prevOutput = layer.postActivationOutput;
                 }
 
@@ -102,14 +152,13 @@ public class NeuralNetwork {
      * Calculate the loss of the neural network based on vector outputs from single inputs, or
      * based on matrix outputs as part of batches of vector inputs represented as matrices.
      * @param desiredOutput
-     * @param lossAlgorithm the algorithm value from {@link LossAlgorithm}
      */
-    public void calculateLoss(NArray desiredOutput, LossAlgorithm lossAlgorithm) {
-        if (desiredOutput == null || desiredOutput.dimension > 2 || lossAlgorithm == null) {
+    public void calculateLoss(NArray desiredOutput) {
+        if (desiredOutput == null || desiredOutput.dimension > 2 || this.lossAlgorithm == null) {
             throw new IllegalArgumentException("Desired output array must not be null to calculate loss.");
         }
 
-        switch (lossAlgorithm) {
+        switch (this.lossAlgorithm) {
             case CCELoss -> calculateCCE(desiredOutput);
             case RMSELoss -> calculateRMSE(desiredOutput);
             case BCELoss -> calculateBCE(desiredOutput);
@@ -123,14 +172,13 @@ public class NeuralNetwork {
      * Intended to calculate loss solely in cases where the neural network produces a single float
      * output (1 neuron in the last layer).
      * @param desiredOutput
-     * @param lossAlgorithm
      */
-    public void calculateLoss(Number desiredOutput, LossAlgorithm lossAlgorithm) {
-        if (desiredOutput == null || lossAlgorithm == null) {
+    public void calculateLoss(Number desiredOutput) {
+        if (desiredOutput == null || this.lossAlgorithm == null) {
             throw new IllegalArgumentException("Desired output array must not be null to calculate loss.");
         }
 
-        switch (lossAlgorithm) {
+        switch (this.lossAlgorithm) {
             case CCELoss -> calculateCCE(desiredOutput);
             case RMSELoss -> calculateRMSE(desiredOutput);
             case BCELoss -> calculateBCE(desiredOutput);

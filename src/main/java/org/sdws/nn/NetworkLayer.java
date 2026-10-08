@@ -14,6 +14,8 @@ public class NetworkLayer {
     public NArray<Number> preActivationOutput;
     public NArray<Number> postActivationOutput;
 
+    public NetworkLayer prevLayer, nextLayer;
+
     /**
      * Defines a single layer of neurons, initialized with a random set of weights
      * and biases. Activation function type is set to {@link ActivationFunc}{@code .ReLU} by default.<p></p>
@@ -34,6 +36,8 @@ public class NetworkLayer {
         this.numOutputs = neurons;
         this.gradientsW = NArray.CreateZeros(neurons, inputs);
         this.gradientsB = NArray.CreateZeros(neurons);
+        this.prevLayer = null;
+        this.nextLayer = null;
     }
 
     /**
@@ -57,6 +61,8 @@ public class NetworkLayer {
         this.numOutputs = neurons;
         this.gradientsW = NArray.CreateZeros(neurons, inputs);
         this.gradientsB = NArray.CreateZeros(neurons);
+        this.prevLayer = null;
+        this.nextLayer = null;
     }
 
     /**
@@ -80,7 +86,6 @@ public class NetworkLayer {
             case ReLU -> Activation.ReLU(this.postActivationOutput);
             case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
             case Step -> Activation.Step(this.postActivationOutput);
-            case Tanh -> Activation.Tanh(this.postActivationOutput);
             case Softmax -> Activation.Softmax(this.postActivationOutput);
         }
 
