@@ -5,6 +5,7 @@ import org.sdws.nn.NetworkLayer;
 import org.sdws.nn.NeuralNetwork;
 import org.sdws.util.ActivationFunc;
 import org.sdws.util.LossAlgorithm;
+import org.sdws.visualizer.NeuralVisualizer;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ public class Main {
         NetworkLayer second = new NetworkLayer(6,4, ActivationFunc.ReLU);
         NetworkLayer softmax = new NetworkLayer(4, 4, ActivationFunc.Softmax);
         NeuralNetwork network = new NeuralNetwork(
+                0.001f,
+                LossAlgorithm.CCELoss,
                 first, second, softmax
         );
 
@@ -29,20 +32,10 @@ public class Main {
                 List.of(1f, 0f, 0f, 0f)
         );
 
+        network.feedForward(testInput);
+        network.calculateLoss(testOutput);
+        System.out.println("loss: " + network.loss() + " output: " + network.output);
 
-        //network.calculateLoss(batchOutput, LossAlgorithm.CCELoss);
-        //System.out.println("loss: " + network.loss);
-
-        float avgLoss = 0f;
-        int iterations = 100;
-        for (int i = 0; i < iterations; i++) {
-            NArray<Float> batchInput = NArray.CreateRandom(4,3);
-            network.feedForward(batchInput);
-            network.calculateLoss(batchOutput, LossAlgorithm.CCELoss);
-            System.out.println("loss: " + network.loss);
-            avgLoss += network.loss;
-        }
-
-        System.out.println("avgLoss: " + avgLoss/iterations);
+        NeuralVisualizer.run(network);
     }
 }
