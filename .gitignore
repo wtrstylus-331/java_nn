@@ -6,6 +6,7 @@ notes.txt
 
 ### IntelliJ IDEA ###
 .idea/
+.idea
 .idea/misc.xml
 .idea/modules.xml
 .idea/jarRepositories.xml
