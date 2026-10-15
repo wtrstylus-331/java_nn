@@ -27,11 +27,12 @@ The current architecture of this library is constantly changing to accommodate f
 
 # Playing around with it
 1. Clone via git or GitHub desktop
-2. Check out the example usage below by editing the **_Main_** class
+2. Check out the example usage below to see how it works, and editing the **_Main_** class
 
 ## Example usage
 First we create three layers.<br>
-It is important that the # of neurons of the **i-1**th layer is equivalent to the input argument for the **i**th layer (except for the first layer)
+It is important that the # of neurons of the **i-1**th layer is equivalent to the input argument for the **i**th layer (except for the first layer)<br>
+Also note that it is not strictly necessary to instantiate a totally seperate layer for the softmax calculation, as this setup could also work with only 2 layers (one ReLU and the last one being Softmax) having six and two neurons respectively, though the extra softmax layer is shown for demonstration and clarity purposes.
 ```
 NetworkLayer first = new NetworkLayer(3,6, ActivationFunc.ReLU); // this layer takes in 3 inputs and has 6 neurons (outputs)
 NetworkLayer second = new NetworkLayer(6,2, ActivationFunc.ReLU); // this layer takes in 6 inputs and has 2 neurons (outputs)
@@ -43,29 +44,30 @@ Now we initialize a new NeuralNetwork object.<br>
 Note that the third parameter for the NeuralNetwork class is a varargs parameter, thus you can add as many layers as possible, but it would be advisable to keep it non-empty.
 ```
 NeuralNetwork network = new NeuralNetwork(
-        0.01f, // learning rate
+        0.001f, // learning rate
         LossAlgorithm.CCELoss, // loss algorithm via enum
         first, second, softmax // layer arguments
 );
 ```
 <br>
 
-Now we create an input vector of size 3 for the 3 inputs of the first layer.
+Now we create an input vector of size 3 for the 3 inputs of the first layer using one of the static functions of the NArray class. This function specifically initializes and assigns our variable a representation of a vector with 3 randomly generated float values.
 ```
 NArray<Float> testInput = NArray.CreateRandom(3);
 ```
 <br>
 
 And we also create the desired output of size 2 since there are 2 neurons in the output layer.<br>
-Note that in this case, since our loss algorithm is CCE, and that the last layer's activation function is the Softmax function, it is recommended that our desired output is in the form of a one-hot encoded vector. In this case, our desired output is the 2nd class (1st index).
+Note that in this case, since our loss algorithm is Cross Categorical Entropy Loss (CCE), and that the last layer's activation function utilizes the Softmax algorithm, it is recommended that our desired output is in the form of a one-hot encoded vector. In this case, our desired output is the 2nd class (1st index).
 ```
 NArray<Float> testOutput = NArray.FromElements(0f, 1f);
 ```
 <br>
 
-Now we call the feedForward method, passing in our input, and calculate the loss obtained by the neural network in comparison to our desired output.
+Now we set the input for our neural network as our vector input created earlier and call the feedForward method, which passes our input attribute through each layer and calculates the loss obtained by the neural network.
 ```
-network.feedForward(testInput);
+network.input(testInput);
+network.feedForward();
 network.calculateLoss(testOutput);
 ```
 <br>
