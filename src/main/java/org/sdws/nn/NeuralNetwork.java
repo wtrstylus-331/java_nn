@@ -5,14 +5,16 @@ import org.sdws.util.LossAlgorithm;
 import org.sdws.mathematics.NArray;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class NeuralNetwork {
     //private final ArrayList<Layer> networkLayers = new ArrayList<>(1);
     private final ArrayList<NetworkLayer> layers;
     private LossAlgorithm lossAlgorithm;
+
+    private NArray input;
     public Object output;
+
     private float loss;
     private float learningRate;
 
@@ -108,21 +110,33 @@ public class NeuralNetwork {
         return this.loss;
     }
 
-    public void feedForward(NArray input) {
-        if (input == null) {
+    public ArrayList<NetworkLayer> getLayers() {
+        return this.layers;
+    }
+
+    public void input(NArray input) {
+        this.input = input;
+    }
+
+    public NArray getInput() {
+        return this.input;
+    }
+
+    public void feedForward() {
+        if (this.input == null) {
             return;
         }
 
-        if (input.dimension == 1) {
-            NArray prevOutput = input;
+        if (this.input.dimension == 1) {
+            NArray prevOutput = this.input;
             for (NetworkLayer layer : this.layers) {
                 layer.ForwardPass(prevOutput);
                 prevOutput = layer.postActivationOutput;
             }
 
             this.output = prevOutput;
-        } else if (input.dimension == 2) {
-            ArrayList<ArrayList<Number>> batch = (ArrayList<ArrayList<Number>>) input.innerArray();
+        } else if (this.input.dimension == 2) {
+            ArrayList<ArrayList<Number>> batch = (ArrayList<ArrayList<Number>>) this.input.innerArray();
             ArrayList<ArrayList<Number>> batchOutput = new ArrayList<>();
 
             for (ArrayList<Number> vec : batch) {
@@ -139,11 +153,42 @@ public class NeuralNetwork {
         }
     }
 
+//    public void feedForward(NArray input) {
+//        if (input == null) {
+//            return;
+//        }
+//
+//        if (input.dimension == 1) {
+//            NArray prevOutput = input;
+//            for (NetworkLayer layer : this.layers) {
+//                layer.ForwardPass(prevOutput);
+//                prevOutput = layer.postActivationOutput;
+//            }
+//
+//            this.output = prevOutput;
+//        } else if (input.dimension == 2) {
+//            ArrayList<ArrayList<Number>> batch = (ArrayList<ArrayList<Number>>) input.innerArray();
+//            ArrayList<ArrayList<Number>> batchOutput = new ArrayList<>();
+//
+//            for (ArrayList<Number> vec : batch) {
+//                NArray prevOutput = NArray.FromCollection(vec);
+//                for (NetworkLayer layer : this.layers) {
+//                    layer.ForwardPass(prevOutput);
+//                    prevOutput = layer.postActivationOutput;
+//                }
+//
+//                batchOutput.add((ArrayList<Number>) prevOutput.innerArray());
+//            }
+//
+//            this.output = NArray.FromNested(batchOutput);
+//        }
+//    }
+
     public void erase() {
         this.layers.clear();
         this.output = null;
         this.loss = Float.NaN;
-        this.learningRate = 0.01f;
+        this.learningRate = 0.001f;
         this.lossAlgorithm = null;
 //        this.accuracy = 0f;
     }
