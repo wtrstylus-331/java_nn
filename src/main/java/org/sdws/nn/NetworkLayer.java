@@ -16,6 +16,8 @@ public class NetworkLayer {
 
     public NetworkLayer prevLayer, nextLayer;
 
+    public int neurons;
+
     /**
      * Defines a single layer of neurons, initialized with a random set of weights
      * and biases. Activation function type is set to {@link ActivationFunc}{@code .ReLU} by default.<p></p>
@@ -38,6 +40,8 @@ public class NetworkLayer {
         this.gradientsB = NArray.CreateZeros(neurons);
         this.prevLayer = null;
         this.nextLayer = null;
+
+        this.neurons = neurons;
     }
 
     /**
@@ -63,6 +67,8 @@ public class NetworkLayer {
         this.gradientsB = NArray.CreateZeros(neurons);
         this.prevLayer = null;
         this.nextLayer = null;
+
+        this.neurons = neurons;
     }
 
     /**
