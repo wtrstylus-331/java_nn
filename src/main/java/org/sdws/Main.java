@@ -32,7 +32,8 @@ public class Main {
                 List.of(1f, 0f, 0f, 0f)
         );
 
-        network.feedForward(testInput);
+        network.input(testInput);
+        network.feedForward();
         network.calculateLoss(testOutput);
         System.out.println("loss: " + network.loss() + " output: " + network.output);
 
