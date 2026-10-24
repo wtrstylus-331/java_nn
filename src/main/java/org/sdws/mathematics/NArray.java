@@ -970,11 +970,9 @@ public class NArray {
         int rows2 = matrix2.getMatrixArray().length;
         int cols2 = matrix2.getMatrixArray()[0].length;
 
-        boolean valid_21 = (cols1 == rows2);
-        boolean valid_12 = (cols2 == rows1);
+        boolean valid = cols1 == rows2;
 
-
-        if (valid_12) {
+        if (valid) {
             float[][] result = new float[rows1][cols2];
             for (int i = 0; i < rows1; i++) {
                 for (int j = 0; j < cols2; j++) {
@@ -990,21 +988,41 @@ public class NArray {
             return new NArray(result);
         }
 
-        if (valid_21) {
-            float[][] result = new float[rows2][cols1];
-            for (int i = 0; i < rows2; i++) {
-                for (int j = 0; j < cols1; j++) {
-                    float sum = 0;
-                    for (int k = 0; k < cols2; k++) {
-                        sum += matrix1.get(i, k) * matrix2.get(k, j);
-                    }
-
-                    result[i][j] = sum;
-                }
-            }
-
-            return new NArray(result);
-        }
+//        boolean valid_21 = (cols1 == rows2);
+//        boolean valid_12 = (cols2 == rows1);
+//
+//
+//        if (valid_12) {
+//            float[][] result = new float[rows1][cols2];
+//            for (int i = 0; i < rows1; i++) {
+//                for (int j = 0; j < cols2; j++) {
+//                    float sum = 0;
+//                    for (int k = 0; k < cols1; k++) {
+//                        sum += matrix1.get(i, k) * matrix2.get(k, j);
+//                    }
+//
+//                    result[i][j] = sum;
+//                }
+//            }
+//
+//            return new NArray(result);
+//        }
+//
+//        if (valid_21) {
+//            float[][] result = new float[rows2][cols1];
+//            for (int i = 0; i < rows2; i++) {
+//                for (int j = 0; j < cols1; j++) {
+//                    float sum = 0;
+//                    for (int k = 0; k < cols2; k++) {
+//                        sum += matrix1.get(i, k) * matrix2.get(k, j);
+//                    }
+//
+//                    result[i][j] = sum;
+//                }
+//            }
+//
+//            return new NArray(result);
+//        }
 
         throw new IllegalArgumentException(
                 "Matrix shapes incompatible: (" + rows1 + " x " + cols1 +

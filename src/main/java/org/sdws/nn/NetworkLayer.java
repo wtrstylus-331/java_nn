@@ -100,7 +100,7 @@ public class NetworkLayer {
     }
 
     private void calculateOutput(NArray input) {
-        this.preActivationOutput = NArray.Mul(input, this.weights);
+        this.preActivationOutput = NArray.Mul(this.weights, input);
         this.preActivationOutput = NArray.Add(this.preActivationOutput, this.biases);
     }
 
