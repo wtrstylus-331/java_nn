@@ -20,20 +20,20 @@ public class Main {
                 first, second, softmax
         );
 
-        NArray<Float> testInput = NArray.CreateRandom(3);
+        NArray testInput = NArray.CreateRandom(3);
         System.out.println("testInput: " + testInput);
 
-        NArray<Float> testOutput = NArray.FromElements(0f, 0f, 0f, 1f);
+        NArray testOutput = NArray.FromElements(0f, 0f, 0f, 1f);
 
-        NArray<Float> batchOutput = NArray.FromRows(
-                List.of(1f, 0f, 0f, 0f),
-                List.of(1f, 0f, 0f, 0f),
-                List.of(1f, 0f, 0f, 0f),
-                List.of(1f, 0f, 0f, 0f)
+        NArray batchOutput = NArray.FromRows(
+                new float[]{1f, 0f, 0f, 0f},
+                new float[]{0f, 1f, 0f, 0f},
+                new float[]{0f, 0f, 1f, 0f},
+                new float[]{0f, 0f, 0f, 1f}
         );
 
         network.input(testInput);
-        network.feedForward();
+        network.forwardPass();
         network.calculateLoss(testOutput);
         System.out.println("loss: " + network.loss() + " output: " + network.output);
 
