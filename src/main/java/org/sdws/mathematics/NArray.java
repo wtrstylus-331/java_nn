@@ -1,361 +1,620 @@
 package org.sdws.mathematics;
 
-import java.util.*;
+import java.util.Random;
+import java.util.Objects;
+import java.util.Arrays;
 
-public class NArray<E extends Number> {
-    private ArrayList<?> array;
+public class NArray {
+    //private ArrayList<?> array;
+    private float[] vec;
+    private float[][] matrix;
     public int elements, dimension;
-    public ArrayList<Integer> shape;
+    public int[] shape;
+    //public ArrayList<Integer> shape;
     private static Random rand = new Random();
 
     /*
     Class methods
      */
 
-    private NArray(ArrayList<?> array) {
-        this.array = array;
-        this.dimension = this.getDimension(this.array);
-        this.elements = this.getElements(this.array);
-        this.shape = new ArrayList<>(this.dimension);
+//    private NArray(ArrayList<?> array) {
+//        this.array = array;
+//        this.dimension = this.getDimension(this.array);
+//        this.elements = this.getElements(this.array);
+//        this.shape = new ArrayList<>(this.dimension);
+//
+//        if (this.dimension == 1) {
+//            this.shape.add(1);
+//            this.shape.add(this.array.size());
+//        } else {
+//            this.shape.add(this.array.size());
+//            this.shape.add(((ArrayList<ArrayList<E>>)this.array).get(0).size());
+//        }
+//    }
 
-        if (this.dimension == 1) {
-            this.shape.add(1);
-            this.shape.add(this.array.size());
-        } else {
-            this.shape.add(this.array.size());
-            this.shape.add(((ArrayList<ArrayList<E>>)this.array).get(0).size());
-        }
+    private NArray(float[] vecInput) {
+        this.vec = vecInput;
+        this.matrix = null;
+        this.dimension = 1;
+        this.elements = this.vec.length;
+        this.shape = new int[2];
+        this.shape[0] = 1;
+        this.shape[1] = this.elements;
+    }
+
+    private NArray(float[][] matrixInput) {
+        this.vec = null;
+        this.matrix = matrixInput;
+        this.dimension = 2;
+        this.shape = new int[2];
+        this.shape[0] = this.matrix.length;
+        this.shape[1] = this.matrix[0].length;
+        this.elements = this.shape[0] * this.shape[1];
     }
 
     @Override
     public String toString() {
-        return this.array.toString();
-    }
-
-    private Integer getElements(Object input) {
-        if (!(input instanceof ArrayList)) {
-            return 1;
+        if (this.matrix == null) {
+            return Arrays.toString(this.vec);
         } else {
-            int elements = 0;
-
-            for (Object sublist : (ArrayList<?>) input) {
-                elements += this.getElements(sublist);
-            }
-
-            return elements;
+            return Arrays.deepToString(this.matrix);
         }
     }
 
-    private Integer getDimension(Object input) {
-        if (!(input instanceof ArrayList)) {
-            return 0;
-        } else {
-            int dim = 1;
-            dim += this.getDimension(((ArrayList<?>) input).get(0));
-            return dim;
+//    private Integer getElements(Object input) {
+//        if (!(input instanceof float[][])) {
+//            return 1;
+//        } else {
+//            int elements = 0;
+//
+//            for (Object sublist : (ArrayList<?>) input) {
+//                elements += this.getElements(sublist);
+//            }
+//
+//            return elements;
+//        }
+//    }
+//
+//    private Integer getDimension(Object input) {
+//        if (!(input instanceof ArrayList)) {
+//            return 0;
+//        } else {
+//            int dim = 1;
+//            dim += this.getDimension(((ArrayList<?>) input).get(0));
+//            return dim;
+//        }
+//    }
+
+    public float get(int index) {
+        if (this.vec == null) {
+            throw new IllegalStateException("Cannot retrieve elements this way from a matrix.");
         }
+
+        if (Objects.equals(this.elements, 0)) {
+            throw new IllegalStateException("Cannot retrieve anything from an empty vector.");
+        }
+
+        if (index < 0 || index >= this.vec.length) {
+            throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds for this vector NArray.");
+        }
+
+        return this.vec[index];
     }
 
-    public E get(int index) {
-        if (this.array.isEmpty()) {
-            return null;
+//    public E get(int index) {
+//        if (this.array.isEmpty()) {
+//            return null;
+//        }
+//
+//        if (this.dimension > 1) {
+//            throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
+//        }
+//
+//        if (index >= this.array.size() || index < 0) {
+//            throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds for this NArray.");
+//        }
+//
+//        return ((ArrayList<E>)this.array).get(index);
+//    }
+
+    public void set(int index, float value) {
+        if (this.vec == null) {
+            throw new IllegalStateException("Cannot retrieve elements this way from a matrix.");
         }
 
-        if (this.dimension > 1) {
-            throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
+        if (Objects.equals(this.elements, 0)) {
+            throw new IllegalStateException("Cannot retrieve anything from an empty vector.");
         }
 
-        if (index >= this.array.size() || index < 0) {
-            throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds for this NArray.");
+        if (index < 0 || index >= this.vec.length) {
+            throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds for this vector NArray.");
         }
 
-        return ((ArrayList<E>)this.array).get(index);
+        this.vec[index] = value;
     }
 
-    public void set(int index, E element) {
-        if (!this.array.isEmpty()) {
-            if (this.dimension > 1) {
-                throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
-            }
+//    public void set(int index, E element) {
+//        if (!this.array.isEmpty()) {
+//            if (this.dimension > 1) {
+//                throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
+//            }
+//
+//            if (index >= this.array.size() || index < 0) {
+//                throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds for this NArray.");
+//            }
+//
+//            ((ArrayList<E>)this.array).set(index, element);
+//        } else {
+//            throw new IllegalArgumentException("Cannot set an element into an empty NArray.");
+//        }
+//    }
 
-            if (index >= this.array.size() || index < 0) {
-                throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds for this NArray.");
-            }
-
-            ((ArrayList<E>)this.array).set(index, element);
-        } else {
-            throw new IllegalArgumentException("Cannot set an element into an empty NArray.");
+    public float get(int row, int column) {
+        if (this.matrix == null) {
+            throw new IllegalStateException("Cannot retrieve elements from a vector.");
         }
+
+        if (Objects.equals(this.elements, 0)) {
+            throw new IllegalStateException("Cannot retrieve anything from an empty matrix.");
+        }
+
+        if (row >= this.matrix.length || row < 0) {
+            throw new IndexOutOfBoundsException("Row index: " + row + " is out of bounds for this matrix NArray.");
+        }
+
+        if (column >= this.matrix[row].length || column < 0) {
+            throw new IndexOutOfBoundsException("Column index: " + column + " is out of bounds for this matrix NArray.");
+        }
+
+        return this.matrix[row][column];
     }
 
-    public E get(int row, int column) {
-        if (this.array.isEmpty()) {
-            return null;
+//    public E get(int row, int column) {
+//        if (this.array.isEmpty()) {
+//            return null;
+//        }
+//
+//        if (this.dimension < 2) {
+//            throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
+//        }
+//
+//        if (row >= this.array.size() || row < 0) {
+//            throw new IndexOutOfBoundsException("Row index: " + row + " is out of bounds for this NArray.");
+//        }
+//
+//        if (column >= ((ArrayList<E>)this.array.get(row)).size() || column < 0) {
+//            throw new IndexOutOfBoundsException("Column index: " + column + " is out of bounds for this NArray.");
+//        }
+//
+//        return ((ArrayList<ArrayList<E>>)this.array).get(row).get(column);
+//    }
+
+    public void set(int row, int column, float value) {
+        if (this.matrix == null) {
+            throw new IllegalStateException("Cannot retrieve elements from a vector.");
         }
 
-        if (this.dimension < 2) {
-            throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
+        if (Objects.equals(this.elements, 0)) {
+            throw new IllegalStateException("Cannot retrieve anything from an empty matrix.");
         }
 
-        if (row >= this.array.size() || row < 0) {
-            throw new IndexOutOfBoundsException("Row index: " + row + " is out of bounds for this NArray.");
+        if (row >= this.matrix.length || row < 0) {
+            throw new IndexOutOfBoundsException("Row index: " + row + " is out of bounds for this matrix NArray.");
         }
 
-        if (column >= ((ArrayList<E>)this.array.get(row)).size() || column < 0) {
-            throw new IndexOutOfBoundsException("Column index: " + column + " is out of bounds for this NArray.");
+        if (column >= this.matrix[row].length || column < 0) {
+            throw new IndexOutOfBoundsException("Column index: " + column + " is out of bounds for this matrix NArray.");
         }
 
-        return ((ArrayList<ArrayList<E>>)this.array).get(row).get(column);
+        this.matrix[row][column] = value;
     }
 
-    public void set(int row, int column, E element) {
-        if (!this.array.isEmpty()) {
-            if (this.dimension < 2) {
-                throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
-            }
+//    public void set(int row, int column, E element) {
+//        if (!this.array.isEmpty()) {
+//            if (this.dimension < 2) {
+//                throw new IllegalArgumentException("Cannot retrieve an element using this variation of the class method.");
+//            }
+//
+//            if (row >= this.array.size() || row < 0) {
+//                throw new IndexOutOfBoundsException("Row index: " + row + " is out of bounds for this NArray.");
+//            }
+//
+//            if (column >= ((ArrayList<E>)this.array.get(row)).size() || column < 0) {
+//                throw new IndexOutOfBoundsException("Column index: " + column + " is out of bounds for this NArray.");
+//            }
+//
+//            ((ArrayList<ArrayList<E>>)this.array).get(row).set(column, element);
+//        } else {
+//            throw new IllegalArgumentException("Cannot set an element into an empty NArray.");
+//        }
+//    }
 
-            if (row >= this.array.size() || row < 0) {
-                throw new IndexOutOfBoundsException("Row index: " + row + " is out of bounds for this NArray.");
-            }
 
-            if (column >= ((ArrayList<E>)this.array.get(row)).size() || column < 0) {
-                throw new IndexOutOfBoundsException("Column index: " + column + " is out of bounds for this NArray.");
-            }
-
-            ((ArrayList<ArrayList<E>>)this.array).get(row).set(column, element);
-        } else {
-            throw new IllegalArgumentException("Cannot set an element into an empty NArray.");
+    public float[] getVecArray() {
+        if (vec == null) {
+            throw new IllegalStateException("Inner vector array is null, did you mean getMatrixArray()?");
         }
+        return vec;
     }
 
-    public ArrayList<?> innerArray() {
-        return this.array;
+    public float[][] getMatrixArray() {
+        if (matrix == null) {
+            throw new IllegalStateException("Inner matrix array is null, did you mean getVecArray()?");
+        }
+        return matrix;
     }
 
+//    public ArrayList<?> innerArray() {
+//        return this.array;
+//    }
+
+    /**
+     * Mutates the NArray in place to transpose between matrices and vectors.
+     */
     public void transpose() {
-        if (this.dimension < 2) { // transpose vector -> matrix
-            ArrayList<ArrayList<E>> column = new ArrayList<>();
-
-            for (int i = 0; i < this.shape.get(1); i++) {
-                ArrayList<E> row = new ArrayList<>();
-                row.add(this.get(i));
-                column.add(row);
+        switch (this.dimension) {
+            case 1: {   // transpose vector to matrix
+                this.vecToMatrix();
+                break;
             }
-
-            this.array = column;
-        } else { // transpose matrix -> matrix/vector
-            if (this.shape.get(1) <= 1) { // transpose into a vector
-                ArrayList<E> vec = new ArrayList<>();
-                ArrayList<ArrayList<E>> curr = (ArrayList<ArrayList<E>>) this.array;
-
-                for  (int i = 0; i < curr.size(); i++) {
-                    ArrayList<E> row = curr.get(i);
-                    vec.add(row.get(0));
+            case 2: {   // transpose matrix to either matrix or vector
+                if (this.shape[1] == 1) {
+                    this.matrixToVector();
+                } else {
+                    this.matrixToMatrix();
                 }
-
-                this.array = vec;
-            } else { // regular matrix transpose algorithm
-                ArrayList<ArrayList<E>> transposed = new ArrayList<>();
-
-                int newRows = this.shape.get(1);
-                int newColumns = this.shape.get(0);
-
-                for (int i = 0; i < newRows; i++) {
-                    ArrayList<E> row = new ArrayList<>();
-                    for (int j = 0; j < newColumns; j++) {
-                        if (this.get(0,0).getClass().equals(Float.class)) {
-                            row.add((E) (Float) 0f);
-                        } else if (this.get(0,0).getClass().equals(Double.class)) {
-                            row.add((E) (Double) 0d);
-                        } else if (this.get(0,0).getClass().equals(Integer.class)) {
-                            row.add((E) (Integer) 0);
-                        } else if (this.get(0,0).getClass().equals(Long.class)) {
-                            row.add((E) (Long) 0L);
-                        } else if (this.get(0,0).getClass().equals(Short.class)) {
-                            row.add((E) (Short) (short) 0);
-                        } else if (this.get(0,0).getClass().equals(Byte.class)) {
-                            row.add((E) (Byte) (byte) 0);
-                        } else {
-                            row.add(null);
-                        }
-                    }
-
-                    transposed.add(row);
-                }
-
-                for (int i = 0; i < this.shape.get(0); i++) {
-                    for (int j = 0; j < this.shape.get(1); j++) {
-                        transposed.get(j).set(i, this.get(i, j));
-                    }
-                }
-
-                this.array = transposed;
+                break;
             }
-        }
-
-        this.dimension = this.getDimension(this.array);
-        this.shape.clear();
-
-        if (this.dimension == 1) {
-            this.shape.add(1);
-            this.shape.add(this.array.size());
-        } else {
-            this.shape.add(this.array.size());
-            this.shape.add(((ArrayList<ArrayList<E>>)this.array).get(0).size());
+            default: {
+                break;
+            }
         }
     }
+
+    private void vecToMatrix() {
+        float[][] matrix = new float[this.elements][1];
+
+        for (int i = 0; i < this.elements; i++) {
+            matrix[i][0] = this.vec[i];
+        }
+
+        this.matrix = matrix;
+        this.vec = null;
+        this.dimension = 2;
+        this.shape = new int[2];
+        this.shape[0] = this.matrix.length;
+        this.shape[1] = this.matrix[0].length;
+    }
+
+    private void matrixToVector() {
+        float[] vec = new float[this.elements];
+        for (int i = 0; i < this.elements; i++) {
+            vec[i] = this.matrix[i][0];
+        }
+
+        this.matrix = null;
+        this.vec = vec;
+        this.dimension = 1;
+        this.shape = new int[2];
+        this.shape[0] = 1;
+        this.shape[1] = this.elements;
+    }
+
+    private void matrixToMatrix() {
+        float[][] matrix = new float[this.shape[1]][this.shape[0]];
+        for (int i = 0; i < this.shape[0]; i++) {
+            for (int j = 0; j < this.shape[1]; j++) {
+                matrix[j][i] = this.matrix[i][j];
+            }
+        }
+
+        this.matrix = matrix;
+        this.dimension = 2;
+        this.shape = new int[2];
+        this.shape[0] = this.matrix.length;
+        this.shape[1] = this.matrix[0].length;
+    }
+
+//    public void transpose() {
+//        if (this.dimension < 2) { // transpose vector -> matrix
+//            ArrayList<ArrayList<E>> column = new ArrayList<>();
+//
+//            for (int i = 0; i < this.shape.get(1); i++) {
+//                ArrayList<E> row = new ArrayList<>();
+//                row.add(this.get(i));
+//                column.add(row);
+//            }
+//
+//            this.array = column;
+//        } else { // transpose matrix -> matrix/vector
+//            if (this.shape.get(1) <= 1) { // transpose into a vector
+//                ArrayList<E> vec = new ArrayList<>();
+//                ArrayList<ArrayList<E>> curr = (ArrayList<ArrayList<E>>) this.array;
+//
+//                for  (int i = 0; i < curr.size(); i++) {
+//                    ArrayList<E> row = curr.get(i);
+//                    vec.add(row.get(0));
+//                }
+//
+//                this.array = vec;
+//            } else { // regular matrix transpose algorithm
+//                ArrayList<ArrayList<E>> transposed = new ArrayList<>();
+//
+//                int newRows = this.shape.get(1);
+//                int newColumns = this.shape.get(0);
+//
+//                for (int i = 0; i < newRows; i++) {
+//                    ArrayList<E> row = new ArrayList<>();
+//                    for (int j = 0; j < newColumns; j++) {
+//                        if (this.get(0,0).getClass().equals(Float.class)) {
+//                            row.add((E) (Float) 0f);
+//                        } else if (this.get(0,0).getClass().equals(Double.class)) {
+//                            row.add((E) (Double) 0d);
+//                        } else if (this.get(0,0).getClass().equals(Integer.class)) {
+//                            row.add((E) (Integer) 0);
+//                        } else if (this.get(0,0).getClass().equals(Long.class)) {
+//                            row.add((E) (Long) 0L);
+//                        } else if (this.get(0,0).getClass().equals(Short.class)) {
+//                            row.add((E) (Short) (short) 0);
+//                        } else if (this.get(0,0).getClass().equals(Byte.class)) {
+//                            row.add((E) (Byte) (byte) 0);
+//                        } else {
+//                            row.add(null);
+//                        }
+//                    }
+//
+//                    transposed.add(row);
+//                }
+//
+//                for (int i = 0; i < this.shape.get(0); i++) {
+//                    for (int j = 0; j < this.shape.get(1); j++) {
+//                        transposed.get(j).set(i, this.get(i, j));
+//                    }
+//                }
+//
+//                this.array = transposed;
+//            }
+//        }
+//
+//        this.dimension = this.getDimension(this.array);
+//        this.shape.clear();
+//
+//        if (this.dimension == 1) {
+//            this.shape.add(1);
+//            this.shape.add(this.array.size());
+//        } else {
+//            this.shape.add(this.array.size());
+//            this.shape.add(((ArrayList<ArrayList<E>>)this.array).get(0).size());
+//        }
+//    }
 
     /*
     Static class functions
      */
 
-    public static <E extends Number> NArray<E> FromRows(List<E>... rows) {
-        if (rows.length == 0 || rows[0].isEmpty()) {
-            return new NArray<>(new ArrayList<>(0));
+    /**
+     *
+     * @param rows
+     * @return
+     * @throws IllegalArgumentException only if the length of rows is not equal
+     */
+    public static NArray FromRows(float[]... rows) throws IllegalArgumentException {
+        if (rows.length == 0 || rows[0].length == 0) {
+            return new NArray(new float[0][0]);
         }
 
-        if (rows.length == 1) { // create a vector instead since it is essentially 1 row
-            return NArray.FromCollection(rows[0]);
+        if (rows.length == 1) {
+            return NArray.FromElements(rows[0]);
         }
 
-        ArrayList<ArrayList<E>> matrix = new ArrayList<>();
-        for (List<E> row : rows) {
-            if (!Objects.equals(row.size(), rows[0].size())) {
+        float[][] matrix = new float[rows.length][rows[0].length];
+        for (int i = 0; i < rows.length; i++) {
+            if (rows[i].length != rows[0].length) {
                 throw new IllegalArgumentException(
                         "Input list rows must have the same number of columns for matrix initialization."
                 );
             }
 
-            matrix.add(new ArrayList<>(row));
+            matrix[i] = rows[i].clone();
         }
-        return new NArray<>(matrix);
+
+        return new NArray(matrix);
     }
 
-    public static <E extends Number> NArray<E> FromNested(ArrayList<ArrayList<E>> arrayList) {
-        if (arrayList.isEmpty()) {
+//    public static <E extends Number> NArray<E> FromRows(List<E>... rows) {
+//        if (rows.length == 0 || rows[0].isEmpty()) {
+//            return new NArray<>(new ArrayList<>(0));
+//        }
+//
+//        if (rows.length == 1) { // create a vector instead since it is essentially 1 row
+//            return NArray.FromCollection(rows[0]);
+//        }
+//
+//        ArrayList<ArrayList<E>> matrix = new ArrayList<>();
+//        for (List<E> row : rows) {
+//            if (!Objects.equals(row.size(), rows[0].size())) {
+//                throw new IllegalArgumentException(
+//                        "Input list rows must have the same number of columns for matrix initialization."
+//                );
+//            }
+//
+//            matrix.add(new ArrayList<>(row));
+//        }
+//        return new NArray<>(matrix);
+//    }
+
+    public static NArray FromNested(float[][] nestedInput) {
+        if (nestedInput.length == 0 || nestedInput[0].length == 0) {
             return null;
         }
 
-        if (arrayList.size() < 2) {
-            return NArray.FromCollection(arrayList.get(0));
+        if (nestedInput.length < 2) {
+            return NArray.FromElements(nestedInput[0]);
         }
 
-        return new NArray<>(arrayList);
+        return new NArray(nestedInput);
     }
 
-    public static <E extends Number> NArray<E> FromElements(E... elements) {
+//    public static <E extends Number> NArray<E> FromNested(ArrayList<ArrayList<E>> arrayList) {
+//        if (arrayList.isEmpty()) {
+//            return null;
+//        }
+//
+//        if (arrayList.size() < 2) {
+//            return NArray.FromCollection(arrayList.get(0));
+//        }
+//
+//        return new NArray<>(arrayList);
+//    }
+
+    public static NArray FromElements(float... elements) {
         if (elements.length == 0) {
-            return new NArray<>(new ArrayList<>());
+            return new NArray(new float[]{});
         }
 
-        return new NArray<>(new ArrayList<>(List.of(elements)));
+        return new NArray(elements);
     }
 
-    public static <E extends Number> NArray<E> FromCollection(Collection<E> collection) {
-        if (collection.isEmpty()) {
-            return new NArray<>(new ArrayList<>());
-        }
 
-        return new NArray<>(new ArrayList<>(collection));
+//    public static <E extends Number> NArray<E> FromCollection(Collection<E> collection) {
+//        if (collection.isEmpty()) {
+//            return new NArray<>(new ArrayList<>());
+//        }
+//
+//        return new NArray<>(new ArrayList<>(collection));
+//    }
+
+    public static NArray CreateZeros(int length) {
+        float[] input = new float[length];
+        Arrays.fill(input, 0f);
+        return new NArray(input);
     }
 
-    public static <E extends Number> NArray<E> CreateZeros(Class<E> type, int length) {
-        ArrayList<E> vec = new ArrayList<>(length);
+//    public static <E extends Number> NArray<E> CreateZeros(Class<E> type, int length) {
+//        ArrayList<E> vec = new ArrayList<>(length);
+//
+//        for (int i = 0; i < length; i++) {
+//            if (type.equals(Float.class)) {
+//                vec.add((E) (Float) 0f);
+//            } else if (type.equals(Double.class)) {
+//                vec.add((E) (Double) 0d);
+//            } else if (type.equals(Integer.class)) {
+//                vec.add((E) (Integer) 0);
+//            } else if (type.equals(Long.class)) {
+//                vec.add((E) (Long) 0L);
+//            } else if (type.equals(Short.class)) {
+//                vec.add((E) (Short) (short) 0);
+//            } else if (type.equals(Byte.class)) {
+//                vec.add((E) (Byte) (byte) 0);
+//            }
+//        }
+//
+//        return NArray.FromCollection(vec);
+//    }
 
-        for (int i = 0; i < length; i++) {
-            if (type.equals(Float.class)) {
-                vec.add((E) (Float) 0f);
-            } else if (type.equals(Double.class)) {
-                vec.add((E) (Double) 0d);
-            } else if (type.equals(Integer.class)) {
-                vec.add((E) (Integer) 0);
-            } else if (type.equals(Long.class)) {
-                vec.add((E) (Long) 0L);
-            } else if (type.equals(Short.class)) {
-                vec.add((E) (Short) (short) 0);
-            } else if (type.equals(Byte.class)) {
-                vec.add((E) (Byte) (byte) 0);
-            }
-        }
+//    public static NArray CreateZeros(int length) {
+//        ArrayList<E> vec = new ArrayList<>(length);
+//
+//        for (int i = 0; i < length; i++) {
+//            vec.add((E) (Float) 0f);
+//        }
+//
+//        return NArray.FromCollection(vec);
+//    }
 
-        return NArray.FromCollection(vec);
-    }
-
-    public static <E extends Number> NArray<E> CreateZeros(int length) {
-        ArrayList<E> vec = new ArrayList<>(length);
-
-        for (int i = 0; i < length; i++) {
-            vec.add((E) (Float) 0f);
-        }
-
-        return NArray.FromCollection(vec);
-    }
-
-    public static <E extends Number> NArray<E> CreateZeros(Class<E> type, int rows, int columns) {
-        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
-
+    public static NArray CreateZeros(int rows, int columns) {
+        float[][] input = new float[rows][columns];
         for (int i = 0; i < rows; i++) {
-            ArrayList<E> row = new ArrayList<>(columns);
-            for (int j = 0; j < columns; j++) {
-                if (type.equals(Float.class)) {
-                    row.add((E) (Float) 0f);
-                } else if (type.equals(Double.class)) {
-                    row.add((E) (Double) 0d);
-                } else if (type.equals(Integer.class)) {
-                    row.add((E) (Integer) 0);
-                } else if (type.equals(Long.class)) {
-                    row.add((E) (Long) 0L);
-                } else if (type.equals(Short.class)) {
-                    row.add((E) (Short) (short) 0);
-                } else if (type.equals(Byte.class)) {
-                    row.add((E) (Byte) (byte) 0);
-                } else {
-                    row.add((E) (Float) 0f);
-                }
-            }
-            matrix.add(row);
+            Arrays.fill(input[i], 0f);
         }
-
-        return NArray.FromNested(matrix);
+        return new NArray(input);
     }
 
-    public static <E extends Number> NArray<E> CreateZeros(int rows, int columns) {
-        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
+//    public static <E extends Number> NArray<E> CreateZeros(Class<E> type, int rows, int columns) {
+//        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
+//
+//        for (int i = 0; i < rows; i++) {
+//            ArrayList<E> row = new ArrayList<>(columns);
+//            for (int j = 0; j < columns; j++) {
+//                if (type.equals(Float.class)) {
+//                    row.add((E) (Float) 0f);
+//                } else if (type.equals(Double.class)) {
+//                    row.add((E) (Double) 0d);
+//                } else if (type.equals(Integer.class)) {
+//                    row.add((E) (Integer) 0);
+//                } else if (type.equals(Long.class)) {
+//                    row.add((E) (Long) 0L);
+//                } else if (type.equals(Short.class)) {
+//                    row.add((E) (Short) (short) 0);
+//                } else if (type.equals(Byte.class)) {
+//                    row.add((E) (Byte) (byte) 0);
+//                } else {
+//                    row.add((E) (Float) 0f);
+//                }
+//            }
+//            matrix.add(row);
+//        }
+//
+//        return NArray.FromNested(matrix);
+//    }
+//
+//    public static <E extends Number> NArray<E> CreateZeros(int rows, int columns) {
+//        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
+//
+//        for (int i = 0; i < rows; i++) {
+//            ArrayList<E> row = new ArrayList<>(columns);
+//            for (int j = 0; j < columns; j++) {
+//                row.add((E) (Float) 0f);
+//            }
+//            matrix.add(row);
+//        }
+//
+//        return NArray.FromNested(matrix);
+//    }
 
-        for (int i = 0; i < rows; i++) {
-            ArrayList<E> row = new ArrayList<>(columns);
-            for (int j = 0; j < columns; j++) {
-                row.add((E) (Float) 0f);
-            }
-            matrix.add(row);
-        }
-
-        return NArray.FromNested(matrix);
-    }
-
-    public static <E extends Number> NArray<E> CreateRandom(int length) {
-        ArrayList<E> vec = new ArrayList<>(length);
-
+    public static NArray CreateRandom(int length) {
+        float[] input = new float[length];
         for (int i = 0; i < length; i++) {
-            vec.add((E) (Float) ((rand.nextFloat() * 2) - 1));
+            input[i] = (rand.nextFloat() * 2) - 1;
         }
 
-        return NArray.FromCollection(vec);
+        return new NArray(input);
     }
 
-    public static <E extends Number> NArray<E> CreateRandom(int rows, int columns) {
-        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
+//    public static <E extends Number> NArray<E> CreateRandom(int length) {
+//        ArrayList<E> vec = new ArrayList<>(length);
+//
+//        for (int i = 0; i < length; i++) {
+//            vec.add((E) (Float) ((rand.nextFloat() * 2) - 1));
+//        }
+//
+//        return NArray.FromCollection(vec);
+//    }
 
+    public static NArray CreateRandom(int rows, int columns) {
+        float[][] input = new float[rows][columns];
         for (int i = 0; i < rows; i++) {
-            ArrayList<E> row = new ArrayList<>(columns);
             for (int j = 0; j < columns; j++) {
-                row.add((E) (Float) ((rand.nextFloat() * 2) - 1));
+                input[i][j] = (rand.nextFloat() * 2) - 1;
             }
-            matrix.add(row);
         }
 
-        return NArray.FromNested(matrix);
+        return new NArray(input);
     }
+
+//    public static <E extends Number> NArray<E> CreateRandom(int rows, int columns) {
+//        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
+//
+//        for (int i = 0; i < rows; i++) {
+//            ArrayList<E> row = new ArrayList<>(columns);
+//            for (int j = 0; j < columns; j++) {
+//                row.add((E) (Float) ((rand.nextFloat() * 2) - 1));
+//            }
+//            matrix.add(row);
+//        }
+//
+//        return NArray.FromNested(matrix);
+//    }
 
 //    public static <E extends Number> NArray<E> InitializeHe(int length) {
 //        if (collection.isEmpty()) {
@@ -365,53 +624,87 @@ public class NArray<E extends Number> {
 //        return new NArray<>(new ArrayList<>(collection));
 //    }
 
-    public static <E extends Number> NArray<E> InitializeHe(int rows, int columns) {
-        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
-
+    public static NArray InitializeHe(int rows, int columns) {
+        float[][] input = new float[rows][columns];
         for (int i = 0; i < rows; i++) {
-            ArrayList<E> row = new ArrayList<>(columns);
             for (int j = 0; j < columns; j++) {
-                row.add((E) (Float) ((float) rand.nextGaussian() * (float)Math.sqrt(2f / (float)columns)));
+                input[i][j] = ((float) rand.nextGaussian() * (float)Math.sqrt(2f / (float)columns));
             }
-            matrix.add(row);
         }
 
-        return NArray.FromNested(matrix);
+        return new NArray(input);
     }
 
-    public static <E extends Number> NArray<E> DeepCopy(NArray<E> array) {
+//    public static <E extends Number> NArray<E> InitializeHe(int rows, int columns) {
+//        ArrayList<ArrayList<E>> matrix = new ArrayList<>(rows);
+//
+//        for (int i = 0; i < rows; i++) {
+//            ArrayList<E> row = new ArrayList<>(columns);
+//            for (int j = 0; j < columns; j++) {
+//                row.add((E) (Float) ((float) rand.nextGaussian() * (float)Math.sqrt(2f / (float)columns)));
+//            }
+//            matrix.add(row);
+//        }
+//
+//        return NArray.FromNested(matrix);
+//    }
+
+    public static NArray DeepCopy(NArray array) {
         if (array == null) {
             return null;
         }
 
-        if (array.dimension == 1) { // copy a vector
-            ArrayList<E> list = new ArrayList<>();
-
-            for (E elem : (ArrayList<E>) array.array) {
-                list.add(elem);
+        switch (array.dimension) {
+            case 1: {
+                return new NArray(array.getVecArray().clone());
             }
-
-            return new NArray<>(list);
-        } else { // copy a matrix
-            ArrayList<ArrayList<E>> result = new ArrayList<>(array.shape.get(0));
-
-            for (int i = 0; i < array.shape.get(0); i++) {
-                ArrayList<E> origRow = (ArrayList<E>) array.array.get(i);
-                ArrayList<E> copyRow = new ArrayList<>(((ArrayList<E>) array.array.get(i)).size());
-
-                for (E element : origRow) {
-                    copyRow.add(element);
+            case 2: {
+                float[][] matrix = new float[array.shape[0]][array.shape[1]];
+                float[][] original = array.getMatrixArray();
+                for (int i = 0; i < array.shape[0]; i++) {
+                    matrix[i] = original[i].clone();
                 }
-
-                result.add(copyRow);
+                return new NArray(matrix);
             }
-
-            return new NArray<>(result);
+            default: {
+                return null;
+            }
         }
     }
 
-    public static <E extends Number> NArray<E> Add(NArray<E> array1, NArray<E> array2) {
-        if (array1 == null ||  array2 == null) {
+//    public static <E extends Number> NArray<E> DeepCopy(NArray<E> array) {
+//        if (array == null) {
+//            return null;
+//        }
+//
+//        if (array.dimension == 1) { // copy a vector
+//            ArrayList<E> list = new ArrayList<>();
+//
+//            for (E elem : (ArrayList<E>) array.array) {
+//                list.add(elem);
+//            }
+//
+//            return new NArray<>(list);
+//        } else { // copy a matrix
+//            ArrayList<ArrayList<E>> result = new ArrayList<>(array.shape.get(0));
+//
+//            for (int i = 0; i < array.shape.get(0); i++) {
+//                ArrayList<E> origRow = (ArrayList<E>) array.array.get(i);
+//                ArrayList<E> copyRow = new ArrayList<>(((ArrayList<E>) array.array.get(i)).size());
+//
+//                for (E element : origRow) {
+//                    copyRow.add(element);
+//                }
+//
+//                result.add(copyRow);
+//            }
+//
+//            return new NArray<>(result);
+//        }
+//    }
+
+    public static NArray Add(NArray array1, NArray array2) {
+        if (array1 == null || array2 == null) {
             return null;
         }
 
@@ -426,8 +719,24 @@ public class NArray<E extends Number> {
         }
     }
 
-    public static <E extends Number> NArray<E> Subtract(NArray<E> array1, NArray<E> array2) {
-        if (array1 == null ||  array2 == null) {
+//    public static <E extends Number> NArray<E> Add(NArray<E> array1, NArray<E> array2) {
+//        if (array1 == null ||  array2 == null) {
+//            return null;
+//        }
+//
+//        if (array1.dimension == array2.dimension) { // either vec + vec or matrix + matrix
+//            if (array1.dimension == 1) {
+//                return NArray.operateVecs(array1, array2, true);
+//            } else {
+//                return NArray.operateMatrices(array1, array2, true);
+//            }
+//        } else { // only matrix + vec under certain circumstances
+//            return NArray.operMatrixVec(array1, array2, true);
+//        }
+//    }
+
+    public static NArray Subtract(NArray array1, NArray array2) {
+        if (array1 == null || array2 == null) {
             return null;
         }
 
@@ -442,9 +751,25 @@ public class NArray<E extends Number> {
         }
     }
 
-    public static <E extends Number> E Dot(NArray<E> array1, NArray<E> array2) {
-        if (array1 == null ||  array2 == null) {
-            return null;
+//    public static <E extends Number> NArray<E> Subtract(NArray<E> array1, NArray<E> array2) {
+//        if (array1 == null ||  array2 == null) {
+//            return null;
+//        }
+//
+//        if (array1.dimension == array2.dimension) { // either vec + vec or matrix + matrix
+//            if (array1.dimension == 1) {
+//                return NArray.operateVecs(array1, array2, false);
+//            } else {
+//                return NArray.operateMatrices(array1, array2, false);
+//            }
+//        } else { // only matrix + vec under certain circumstances
+//            return NArray.operMatrixVec(array1, array2, false);
+//        }
+//    }
+
+    public static float Dot(NArray array1, NArray array2) {
+        if (array1 == null || array2 == null) {
+            throw new IllegalArgumentException("Vectors cannot be null for dot product.");
         }
 
         if (array1.dimension == array2.dimension) {
@@ -456,7 +781,21 @@ public class NArray<E extends Number> {
         throw new IllegalArgumentException("Cannot determine dot product with provided NArray arguments.");
     }
 
-    public static <E extends Number> NArray<E> Mul(NArray<E> array1, NArray<E> array2) {
+//    public static <E extends Number> E Dot(NArray<E> array1, NArray<E> array2) {
+//        if (array1 == null ||  array2 == null) {
+//            return null;
+//        }
+//
+//        if (array1.dimension == array2.dimension) {
+//            if (array1.dimension == 1) {
+//                return NArray.dotProduct(array1, array2);
+//            }
+//        }
+//
+//        throw new IllegalArgumentException("Cannot determine dot product with provided NArray arguments.");
+//    }
+
+    public static NArray Mul(NArray array1, NArray array2) {
         if (array1 == null ||  array2 == null) {
             return null;
         }
@@ -478,263 +817,357 @@ public class NArray<E extends Number> {
         }
     }
 
+//    public static <E extends Number> NArray<E> Mul(NArray<E> array1, NArray<E> array2) {
+//        if (array1 == null ||  array2 == null) {
+//            return null;
+//        }
+//
+//        if (array1.dimension == array2.dimension) { // either dot product or matrix product
+//            if (array1.dimension == 1) {
+//                throw new IllegalArgumentException(
+//                        "Incorrect function variation for multiplication (For dot product of vectors refer to NArray.Dot)."
+//                );
+//            } else {
+//                return NArray.matrixProduct(array1, array2);
+//            }
+//        } else { // matrix * vec product under certain circumstances
+//            if (array1.dimension == 1) {
+//                return NArray.matrixVecProduct(array2, array1);
+//            } else {
+//                return NArray.matrixVecProduct(array1, array2);
+//            }
+//        }
+//    }
+
     /*
     Private static helper functions
      */
 
-    private static <E extends Number> NArray<E> operateVecs(NArray<E> vec1, NArray<E> vec2, boolean addition) {
-        if (!Objects.equals(vec1.shape, vec2.shape)) {
+    private static NArray operateVecs(NArray vec1, NArray vec2, boolean addition) {
+        if (!Arrays.equals(vec1.shape, vec2.shape)) {
             throw new IllegalArgumentException("Cannot add vector arrays that do not have the same number of elements.");
         }
 
-        ArrayList<E> result = new ArrayList<>(vec1.shape.get(1));
-
-        for (int i = 0; i < vec1.shape.get(1); i++) {
+        float[] result = new float[vec1.elements];
+        for (int i = 0; i < vec1.elements; i++) {
             if (addition) {
-                result.add(NArray.addNums(vec1.get(i), vec2.get(i)));
+                result[i] = vec1.get(i) + vec2.get(i);
             } else {
-                result.add(NArray.subtractNums(vec1.get(i), vec2.get(i)));
+                result[i] = vec1.get(i) - vec2.get(i);
             }
         }
 
-        return new NArray<>(result);
+        return new NArray(result);
     }
 
-    private static <E extends Number> NArray<E> operateMatrices(NArray<E> matrix1, NArray<E> matrix2, boolean addition) {
+    private static NArray operateMatrices(NArray matrix1, NArray matrix2, boolean addition) {
         if (!Objects.equals(matrix1.shape, matrix2.shape)) {
             throw new IllegalArgumentException("Cannot add matrix arrays that do not have the same shape.");
         }
 
-        ArrayList<ArrayList<E>> result = new ArrayList<>(matrix1.shape.get(0));
-        for (int i = 0; i < matrix1.shape.get(0); i++) {
-            ArrayList<E> row = new ArrayList<>(matrix1.shape.get(1));
-
-            for (int j = 0; j < matrix1.shape.get(1); j++) {
-                E a = matrix1.get(i, j);
-                E b = matrix2.get(i, j);
-
-                if (addition) {
-                    row.add(NArray.addNums(a, b));
-                } else {
-                    row.add(NArray.subtractNums(a, b));
-                }
+        float[][] result = new float[matrix1.shape[0]][matrix1.shape[1]];
+        for (int i = 0; i < matrix1.shape[0]; i++) {
+            for (int j = 0; j < matrix1.shape[1]; j++) {
+                result[i][j] = matrix1.get(i, j) + matrix2.get(i, j);
             }
-
-            result.add(row);
         }
 
-        return new NArray<>(result);
+        return new NArray(result);
     }
 
-    private static <E extends Number> NArray<E> operMatrixVec(NArray<E> array1, NArray<E> array2, boolean addition) {
-        if (!Objects.equals(array1.shape.get(1), array2.shape.get(1))) {
+    private static NArray operMatrixVec(NArray array1, NArray array2, boolean addition) {
+        if (!Objects.equals(array1.shape[1], array2.shape[1])) {
             throw new IllegalArgumentException(
                     "Vector length does not match number of matrix columns."
             );
         }
 
-        if (array1.shape.get(0) > 1) { // first arg is a matrix, second arg is a vector
-            ArrayList<ArrayList<E>> result = new ArrayList<>(array1.shape.get(0));
-            for (int i = 0; i < array1.shape.get(0); i++) {
-                ArrayList<E> row = new ArrayList<>(array1.shape.get(1));
+        float[][] result = new float[array1.shape[0]][array1.shape[1]];;
 
-                for (int j = 0; j < array1.shape.get(1); j++) {
-                    E a = array1.get(i, j);
-                    E b = array2.get(j);
-
-                    if (addition) {
-                        row.add(NArray.addNums(a, b));
-                    } else {
-                        row.add(NArray.subtractNums(a, b));
-                    }
+        if (array1.shape[0] > 1) {  // first arg is matrix, second arg is vec
+            for (int i = 0; i < array1.shape[0]; i++) {
+                for (int j = 0; j < array1.shape[1]; j++) {
+                    result[i][j] = array1.get(i, j) + array2.get(i, j);
                 }
-
-                result.add(row);
             }
-
-            return new NArray<>(result);
-        } else { // first arg is a vector, second arg is a matrix
-            ArrayList<ArrayList<E>> result = new ArrayList<>(array2.shape.get(0));
-            for (int i = 0; i < array2.shape.get(0); i++) {
-                ArrayList<E> row = new ArrayList<>(array2.shape.get(1));
-
-                for (int j = 0; j < array2.shape.get(1); j++) {
-                    E a = array2.get(i, j);
-                    E b = array1.get(j);
-
-                    if (addition) {
-                        row.add(NArray.addNums(a, b));
-                    } else {
-                        row.add(NArray.subtractNums(a, b));
-                    }
+        } else {    // first arg is vec, second arg is matrix
+            for (int i = 0; i < array2.shape[0]; i++) {
+                for (int j = 0; j < array2.shape[1]; j++) {
+                    result[i][j] = array2.get(i, j) + array1.get(i, j);
                 }
-
-                result.add(row);
             }
-
-            return new NArray<>(result);
         }
+
+        return new NArray(result);
     }
 
-    private static <E extends Number> E dotProduct(NArray<E> vec1, NArray<E> vec2) {
-        if (!Objects.equals(vec1.shape, vec2.shape)) {
+    private static float dotProduct(NArray vec1, NArray vec2) {
+        if (!Arrays.equals(vec1.shape, vec2.shape)) {
             throw new IllegalArgumentException("Cannot compute dot product of vectors of different length.");
         }
 
-        if (Objects.equals(vec1.shape.get(0), vec2.shape.get(0)) && vec1.shape.get(0) == 0) {
-            return null;
+        if (vec1.shape[0] == 0 || vec1.shape[1] == 0) {
+            throw new IllegalArgumentException("Cannot compute dot product of vectors with shape 0.");
         }
 
-        Class<?> type = vec1.get(0).getClass();
-        Number sum = 0;
-
-        for (int i = 0; i < vec1.shape.get(1); i++) {
-            sum = NArray.mulNumsAccumulate(vec1.get(i), vec2.get(i), sum);
+        float sum = 0;
+        for (int i = 0; i < vec1.elements; i++) {
+            sum += vec1.get(i) * vec2.get(i);
         }
 
-        switch (type.getSimpleName()) {
-            case "Float" -> {
-                return (E) (Float) sum.floatValue();
-            }
-            case "Double" -> {
-                return (E) (Double) sum.doubleValue();
-            }
-            case "Integer" -> {
-                return (E) (Integer) sum.intValue();
-            }
-            case "Long" -> {
-                return (E) (Long) sum.longValue();
-            }
-            case "Short" -> {
-                return (E) (Short) sum.shortValue();
-            }
-            case "Byte" -> {
-                return (E) (Byte) sum.byteValue();
-            }
-            default -> {
-                return null;
-            }
-        }
+        return sum;
     }
 
-    private static <E extends Number> NArray<E> matrixProduct(NArray<E> matrix1, NArray<E> matrix2) {
+//    private static <E extends Number> E dotProduct(NArray<E> vec1, NArray<E> vec2) {
+//        if (!Objects.equals(vec1.shape, vec2.shape)) {
+//            throw new IllegalArgumentException("Cannot compute dot product of vectors of different length.");
+//        }
+//
+//        if (Objects.equals(vec1.shape.get(0), vec2.shape.get(0)) && vec1.shape.get(0) == 0) {
+//            return null;
+//        }
+//
+//        Class<?> type = vec1.get(0).getClass();
+//        Number sum = 0;
+//
+//        for (int i = 0; i < vec1.shape.get(1); i++) {
+//            sum = NArray.mulNumsAccumulate(vec1.get(i), vec2.get(i), sum);
+//        }
+//
+//        switch (type.getSimpleName()) {
+//            case "Float" -> {
+//                return (E) (Float) sum.floatValue();
+//            }
+//            case "Double" -> {
+//                return (E) (Double) sum.doubleValue();
+//            }
+//            case "Integer" -> {
+//                return (E) (Integer) sum.intValue();
+//            }
+//            case "Long" -> {
+//                return (E) (Long) sum.longValue();
+//            }
+//            case "Short" -> {
+//                return (E) (Short) sum.shortValue();
+//            }
+//            case "Byte" -> {
+//                return (E) (Byte) sum.byteValue();
+//            }
+//            default -> {
+//                return null;
+//            }
+//        }
+//    }
+
+    private static NArray matrixProduct(NArray matrix1, NArray matrix2) {
         if (matrix1 == null || matrix2 == null) {
             return null;
         }
 
-        if (!Objects.equals(matrix1.shape.get(1), matrix2.shape.get(0))) {
-            throw new IllegalArgumentException(
-                    "Matrices provided do not have a valid size for matrix multiplication" +
-                            "(Matrix 1 columns must be equal to Matrix 2 rows)."
-            );
+        int rows1 = matrix1.getMatrixArray().length;
+        int cols1 = matrix1.getMatrixArray()[0].length;
+
+        int rows2 = matrix2.getMatrixArray().length;
+        int cols2 = matrix2.getMatrixArray()[0].length;
+
+        boolean valid_21 = (cols1 == rows2);
+        boolean valid_12 = (cols2 == rows1);
+
+
+        if (valid_12) {
+            float[][] result = new float[rows1][cols2];
+            for (int i = 0; i < rows1; i++) {
+                for (int j = 0; j < cols2; j++) {
+                    float sum = 0;
+                    for (int k = 0; k < cols1; k++) {
+                        sum += matrix1.get(i, k) * matrix2.get(k, j);
+                    }
+
+                    result[i][j] = sum;
+                }
+            }
+
+            return new NArray(result);
         }
 
-        int rows1 = matrix1.array.size();
-        int cols1 = ((ArrayList<E>)matrix1.array.get(0)).size();
+        if (valid_21) {
+            float[][] result = new float[rows2][cols1];
+            for (int i = 0; i < rows2; i++) {
+                for (int j = 0; j < cols1; j++) {
+                    float sum = 0;
+                    for (int k = 0; k < cols2; k++) {
+                        sum += matrix1.get(i, k) * matrix2.get(k, j);
+                    }
 
-        int rows2 = matrix2.array.size();
-        int cols2 = ((ArrayList<E>)matrix2.array.get(0)).size();
+                    result[i][j] = sum;
+                }
+            }
 
-        boolean AB_valid = (cols1 == rows2);
-        boolean BA_valid = (cols2 == rows1);
-
-        if (AB_valid) {
-            return NArray.multiplyMats(
-                    (ArrayList<ArrayList<E>>)matrix1.array,
-                    (ArrayList<ArrayList<E>>)matrix2.array,
-                    rows1, cols1, rows2, cols2);
-        }
-
-        if (BA_valid) {
-            return NArray.multiplyMats(
-                    (ArrayList<ArrayList<E>>)matrix2.array,
-                    (ArrayList<ArrayList<E>>)matrix1.array,
-                    rows2, cols2, rows1, cols1);
+            return new NArray(result);
         }
 
         throw new IllegalArgumentException(
-                "NNMatrix shapes incompatible: (" + rows1 + " x " + cols1 +
+                "Matrix shapes incompatible: (" + rows1 + " x " + cols1 +
                         ") cannot multiply with (" + rows2 + " x " + cols2 + ")"
         );
     }
 
-    private static <E extends Number> NArray<E> multiplyMats(
-            ArrayList<ArrayList<E>> matrix1,
-            ArrayList<ArrayList<E>> matrix2,
-            int rowsL, int colsL,
-            int rowsR, int colsR)
-    {
-        ArrayList<ArrayList<E>> result = new ArrayList<>(rowsL);
-        Class<?> type = matrix1.get(0).get(0).getClass();
+//    private static <E extends Number> NArray<E> matrixProduct(NArray<E> matrix1, NArray<E> matrix2) {
+//        if (matrix1 == null || matrix2 == null) {
+//            return null;
+//        }
+//
+//        if (!Objects.equals(matrix1.shape.get(1), matrix2.shape.get(0))) {
+//            throw new IllegalArgumentException(
+//                    "Matrices provided do not have a valid size for matrix multiplication" +
+//                            "(Matrix 1 columns must be equal to Matrix 2 rows)."
+//            );
+//        }
+//
+//        int rows1 = matrix1.array.size();
+//        int cols1 = ((ArrayList<E>)matrix1.array.get(0)).size();
+//
+//        int rows2 = matrix2.array.size();
+//        int cols2 = ((ArrayList<E>)matrix2.array.get(0)).size();
+//
+//        boolean AB_valid = (cols1 == rows2);
+//        boolean BA_valid = (cols2 == rows1);
+//
+//        if (AB_valid) {
+//            return NArray.multiplyMats(
+//                    (ArrayList<ArrayList<E>>)matrix1.array,
+//                    (ArrayList<ArrayList<E>>)matrix2.array,
+//                    rows1, cols1, rows2, cols2);
+//        }
+//
+//        if (BA_valid) {
+//            return NArray.multiplyMats(
+//                    (ArrayList<ArrayList<E>>)matrix2.array,
+//                    (ArrayList<ArrayList<E>>)matrix1.array,
+//                    rows2, cols2, rows1, cols1);
+//        }
+//
+//        throw new IllegalArgumentException(
+//                "NNMatrix shapes incompatible: (" + rows1 + " x " + cols1 +
+//                        ") cannot multiply with (" + rows2 + " x " + cols2 + ")"
+//        );
+//    }
 
-        for (int i = 0; i < rowsL; i++) {
-            ArrayList<E> row = new ArrayList<>();
-            for (int j = 0; j < colsR; j++) {
-                if (type == Integer.class) {
-                    row.add((E) (Integer) 0);
-                }
-                if (type == Float.class) {
-                    row.add((E) (Float) 0f);
-                }
-                if (type == Double.class) {
-                    row.add((E) (Double) 0d);
-                }
-                if (type == Long.class) {
-                    row.add((E) (Long) 0L);
-                }
-                if (type == Short.class) {
-                    row.add((E) (Short) (short) 0);
-                }
-                if (type == Byte.class) {
-                    row.add((E) (Byte) (byte) 0);
-                }
-            }
-            result.add(row);
+//    private static NArray multiplyMats(
+//            float[][] matrix1, float[][] matrix2,
+//            int rowsL, int colsL,
+//            int rowsR, int colsR)
+//    {
+//        float[][] result = new float[rowsL][colsR];
+//        for (int i = 0; i < rowsL; i++) {
+//            for (int j = 0; j < colsR; j++) {
+//                float sum = 0;
+//                for (int k = 0; k < colsL; k++) {
+//                    sum += matrix1[i][k] * matrix2[k][j];
+//                }
+//
+//                result[i][j] = sum;
+//            }
+//        }
+//
+//        return new NArray(result);
+//
+//        ArrayList<ArrayList<E>> result = new ArrayList<>(rowsL);
+//        Class<?> type = matrix1.get(0).get(0).getClass();
+//
+//        for (int i = 0; i < rowsL; i++) {
+//            ArrayList<E> row = new ArrayList<>();
+//            for (int j = 0; j < colsR; j++) {
+//                if (type == Integer.class) {
+//                    row.add((E) (Integer) 0);
+//                }
+//                if (type == Float.class) {
+//                    row.add((E) (Float) 0f);
+//                }
+//                if (type == Double.class) {
+//                    row.add((E) (Double) 0d);
+//                }
+//                if (type == Long.class) {
+//                    row.add((E) (Long) 0L);
+//                }
+//                if (type == Short.class) {
+//                    row.add((E) (Short) (short) 0);
+//                }
+//                if (type == Byte.class) {
+//                    row.add((E) (Byte) (byte) 0);
+//                }
+//            }
+//            result.add(row);
+//        }
+//
+//        for (int i = 0; i < rowsL; i++) {
+//            for (int j = 0; j < colsR; j++) {
+//                Number sum = 0;
+//                for (int k = 0; k < colsL; k++) {
+//                    sum = NArray.mulNumsAccumulate(matrix1.get(i).get(k), matrix2.get(k).get(j), sum);
+//                }
+//                result.get(i).set(j, (E) sum);
+//            }
+//        }
+//
+//        return new NArray<>(result);
+//    }
+
+    private static NArray matrixVecProduct(NArray matrix, NArray vec) {
+        if (matrix.dimension != 2 || vec.dimension != 1) {
+            throw new IllegalArgumentException("matrixVecProduct() requires arguments in positional form (matrix × vector).");
         }
 
-        for (int i = 0; i < rowsL; i++) {
-            for (int j = 0; j < colsR; j++) {
-                Number sum = 0;
-                for (int k = 0; k < colsL; k++) {
-                    sum = NArray.mulNumsAccumulate(matrix1.get(i).get(k), matrix2.get(k).get(j), sum);
-                }
-                result.get(i).set(j, (E) sum);
-            }
-        }
-
-        return new NArray<>(result);
-    }
-
-    private static <E extends Number> NArray<E> matrixVecProduct(NArray<E> matrix, NArray<E> vector) {
-        if (matrix.dimension != 2 || vector.dimension != 1) {
-            throw new IllegalArgumentException("matrixVecProduct requires (matrix × vector).");
-        }
-
-        int rows = matrix.shape.get(0);
-        int cols = matrix.shape.get(1);
-
-        System.out.println("rows: " + rows + " cols: " + cols);
-
-        int vectorLength = vector.shape.get(1);
-
-        System.out.println("vectorLength: " + vectorLength);
+        int rows = matrix.shape[0];
+        int cols = matrix.shape[1];
+        int vectorLength = vec.shape[1];
 
         if (vectorLength != cols) {
             throw new IllegalArgumentException("Vector length must match matrix columns.");
         }
 
-        ArrayList<E> result = new ArrayList<>(rows);
-
+        float[] result = new float[rows];
         for (int i = 0; i < rows; i++) {
             float sum = 0f;
             for (int j = 0; j < cols; j++) {
-                sum += matrix.get(i, j).floatValue() * vector.get(j).floatValue();
+                sum += matrix.get(i, j) * vec.get(j);
             }
-            result.add((E)(Number)sum);
+            result[i] = sum;
         }
 
-        return new NArray<>(result);
+        return new NArray(result);
     }
+
+//    private static <E extends Number> NArray<E> matrixVecProduct(NArray<E> matrix, NArray<E> vector) {
+//        if (matrix.dimension != 2 || vector.dimension != 1) {
+//            throw new IllegalArgumentException("matrixVecProduct requires (matrix × vector).");
+//        }
+//
+//        int rows = matrix.shape.get(0);
+//        int cols = matrix.shape.get(1);
+//
+//        System.out.println("rows: " + rows + " cols: " + cols);
+//
+//        int vectorLength = vector.shape.get(1);
+//
+//        System.out.println("vectorLength: " + vectorLength);
+//
+//        if (vectorLength != cols) {
+//            throw new IllegalArgumentException("Vector length must match matrix columns.");
+//        }
+//
+//        ArrayList<E> result = new ArrayList<>(rows);
+//
+//        for (int i = 0; i < rows; i++) {
+//            float sum = 0f;
+//            for (int j = 0; j < cols; j++) {
+//                sum += matrix.get(i, j).floatValue() * vector.get(j).floatValue();
+//            }
+//            result.add((E)(Number)sum);
+//        }
+//
+//        return new NArray<>(result);
+//    }
 
 
 //    private static <E extends Number> NArray<E> matrixVecProduct(NArray<E> array1, NArray<E> array2) {
@@ -791,85 +1224,85 @@ public class NArray<E extends Number> {
 //        );
 //    }
 
-    private static <E extends Number> E addNums(E a, E b) {
-        Class<?> numType = a.getClass();
-
-        if (numType.equals(Float.class)) {
-            return (E) (Float) (a.floatValue() + b.floatValue());
-        } else if (numType.equals(Double.class)) {
-            return (E) (Double) (a.doubleValue() + b.doubleValue());
-        } else if (numType.equals(Integer.class)) {
-            return (E) (Integer) (a.intValue() + b.intValue());
-        } else if (numType.equals(Long.class)) {
-            return (E) (Long) (a.longValue() + b.longValue());
-        } else if (numType.equals(Short.class)) {
-            return (E) (Short) (short) (a.shortValue() + b.shortValue());
-        } else if (numType.equals(Byte.class)) {
-            return (E) (Byte) (byte) (a.byteValue() + b.byteValue());
-        } else {
-            throw new IllegalArgumentException("Cannot add elements of non-numeric data type.");
-        }
-    }
-
-    private static <E extends Number> E subtractNums(E a, E b) {
-        Class<?> numType = a.getClass();
-
-        if (numType.equals(Float.class)) {
-            return (E) (Float) (a.floatValue() - b.floatValue());
-        } else if (numType.equals(Double.class)) {
-            return (E) (Double) (a.doubleValue() - b.doubleValue());
-        } else if (numType.equals(Integer.class)) {
-            return (E) (Integer) (a.intValue() - b.intValue());
-        } else if (numType.equals(Long.class)) {
-            return (E) (Long) (a.longValue() - b.longValue());
-        } else if (numType.equals(Short.class)) {
-            return (E) (Short) (short) (a.shortValue() - b.shortValue());
-        } else if (numType.equals(Byte.class)) {
-            return (E) (Byte) (byte) (a.byteValue() - b.byteValue());
-        } else {
-            throw new IllegalArgumentException("Cannot add elements of non-numeric data type.");
-        }
-    }
-
-    private static <E extends Number> E mulNums(E a, E b) {
-        Class<?> numType = a.getClass();
-
-        if (numType.equals(Float.class)) {
-            return (E) (Float) (a.floatValue() * b.floatValue());
-        } else if (numType.equals(Double.class)) {
-            return (E) (Double) (a.doubleValue() * b.doubleValue());
-        } else if (numType.equals(Integer.class)) {
-            return (E) (Integer) (a.intValue() * b.intValue());
-        } else if (numType.equals(Long.class)) {
-            return (E) (Long) (a.longValue() * b.longValue());
-        } else if (numType.equals(Short.class)) {
-            return (E) (Short) (short) (a.shortValue() * b.shortValue());
-        } else if (numType.equals(Byte.class)) {
-            return (E) (Byte) (byte) (a.byteValue() * b.byteValue());
-        } else {
-            throw new IllegalArgumentException("Cannot multiply elements of non-numeric data type.");
-        }
-    }
-
-    private static <E extends Number> Number mulNumsAccumulate(E a, E b, Number accumulator) {
-        Class<?> numType = a.getClass();
-
-        if (numType.equals(Float.class)) {
-            accumulator = accumulator.floatValue() + (a.floatValue() * b.floatValue());
-        } else if (numType.equals(Double.class)) {
-            accumulator = accumulator.doubleValue() + (a.doubleValue() * b.doubleValue());
-        } else if (numType.equals(Integer.class)) {
-            accumulator = accumulator.intValue() + (a.intValue() * b.intValue());
-        } else if (numType.equals(Long.class)) {
-            accumulator = accumulator.longValue() + (a.longValue() * b.longValue());
-        } else if (numType.equals(Short.class)) {
-            accumulator = accumulator.shortValue() + (a.shortValue() * b.shortValue());
-        } else if (numType.equals(Byte.class)) {
-            accumulator = accumulator.byteValue() + (a.byteValue() * b.byteValue());
-        } else {
-            throw new IllegalArgumentException("Cannot multiply elements of non-numeric data type.");
-        }
-
-        return accumulator;
-    }
+//    private static <E extends Number> E addNums(E a, E b) {
+//        Class<?> numType = a.getClass();
+//
+//        if (numType.equals(Float.class)) {
+//            return (E) (Float) (a.floatValue() + b.floatValue());
+//        } else if (numType.equals(Double.class)) {
+//            return (E) (Double) (a.doubleValue() + b.doubleValue());
+//        } else if (numType.equals(Integer.class)) {
+//            return (E) (Integer) (a.intValue() + b.intValue());
+//        } else if (numType.equals(Long.class)) {
+//            return (E) (Long) (a.longValue() + b.longValue());
+//        } else if (numType.equals(Short.class)) {
+//            return (E) (Short) (short) (a.shortValue() + b.shortValue());
+//        } else if (numType.equals(Byte.class)) {
+//            return (E) (Byte) (byte) (a.byteValue() + b.byteValue());
+//        } else {
+//            throw new IllegalArgumentException("Cannot add elements of non-numeric data type.");
+//        }
+//    }
+//
+//    private static <E extends Number> E subtractNums(E a, E b) {
+//        Class<?> numType = a.getClass();
+//
+//        if (numType.equals(Float.class)) {
+//            return (E) (Float) (a.floatValue() - b.floatValue());
+//        } else if (numType.equals(Double.class)) {
+//            return (E) (Double) (a.doubleValue() - b.doubleValue());
+//        } else if (numType.equals(Integer.class)) {
+//            return (E) (Integer) (a.intValue() - b.intValue());
+//        } else if (numType.equals(Long.class)) {
+//            return (E) (Long) (a.longValue() - b.longValue());
+//        } else if (numType.equals(Short.class)) {
+//            return (E) (Short) (short) (a.shortValue() - b.shortValue());
+//        } else if (numType.equals(Byte.class)) {
+//            return (E) (Byte) (byte) (a.byteValue() - b.byteValue());
+//        } else {
+//            throw new IllegalArgumentException("Cannot add elements of non-numeric data type.");
+//        }
+//    }
+//
+//    private static <E extends Number> E mulNums(E a, E b) {
+//        Class<?> numType = a.getClass();
+//
+//        if (numType.equals(Float.class)) {
+//            return (E) (Float) (a.floatValue() * b.floatValue());
+//        } else if (numType.equals(Double.class)) {
+//            return (E) (Double) (a.doubleValue() * b.doubleValue());
+//        } else if (numType.equals(Integer.class)) {
+//            return (E) (Integer) (a.intValue() * b.intValue());
+//        } else if (numType.equals(Long.class)) {
+//            return (E) (Long) (a.longValue() * b.longValue());
+//        } else if (numType.equals(Short.class)) {
+//            return (E) (Short) (short) (a.shortValue() * b.shortValue());
+//        } else if (numType.equals(Byte.class)) {
+//            return (E) (Byte) (byte) (a.byteValue() * b.byteValue());
+//        } else {
+//            throw new IllegalArgumentException("Cannot multiply elements of non-numeric data type.");
+//        }
+//    }
+//
+//    private static <E extends Number> Number mulNumsAccumulate(E a, E b, Number accumulator) {
+//        Class<?> numType = a.getClass();
+//
+//        if (numType.equals(Float.class)) {
+//            accumulator = accumulator.floatValue() + (a.floatValue() * b.floatValue());
+//        } else if (numType.equals(Double.class)) {
+//            accumulator = accumulator.doubleValue() + (a.doubleValue() * b.doubleValue());
+//        } else if (numType.equals(Integer.class)) {
+//            accumulator = accumulator.intValue() + (a.intValue() * b.intValue());
+//        } else if (numType.equals(Long.class)) {
+//            accumulator = accumulator.longValue() + (a.longValue() * b.longValue());
+//        } else if (numType.equals(Short.class)) {
+//            accumulator = accumulator.shortValue() + (a.shortValue() * b.shortValue());
+//        } else if (numType.equals(Byte.class)) {
+//            accumulator = accumulator.byteValue() + (a.byteValue() * b.byteValue());
+//        } else {
+//            throw new IllegalArgumentException("Cannot multiply elements of non-numeric data type.");
+//        }
+//
+//        return accumulator;
+//    }
 }
