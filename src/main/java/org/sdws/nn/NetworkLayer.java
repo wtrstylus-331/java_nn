@@ -5,18 +5,19 @@ import org.sdws.mathematics.Activation;
 import org.sdws.mathematics.NArray;
 import org.sdws.mathematics.NNArray;
 
+import java.util.Arrays;
+
 public class NetworkLayer {
-    public NArray<Number> weights;
-    public NArray<Number> biases;
+    public NArray weights;
+    public NArray biases;
     protected ActivationFunc activation;
     protected int numInputs, numOutputs;
-    protected NArray<Number> gradientsW, gradientsB;
-    public NArray<Number> preActivationOutput;
-    public NArray<Number> postActivationOutput;
+    public NArray preActivationOutput;
+    public NArray postActivationOutput;
 
     public NetworkLayer prevLayer, nextLayer;
 
-    public int neurons;
+    private int neurons;
 
     /**
      * Defines a single layer of neurons, initialized with a random set of weights
@@ -31,13 +32,11 @@ public class NetworkLayer {
             throw new IllegalArgumentException("Neurons in a layer must be greater than or equal to one");
         }
 
-        this.weights = NArray.CreateRandom(neurons, inputs);
+        this.weights = NArray.InitializeHe(neurons, inputs);
         this.biases = NArray.CreateZeros(neurons);
         this.activation = ActivationFunc.ReLU;
         this.numInputs = inputs;
         this.numOutputs = neurons;
-        this.gradientsW = NArray.CreateZeros(neurons, inputs);
-        this.gradientsB = NArray.CreateZeros(neurons);
         this.prevLayer = null;
         this.nextLayer = null;
 
@@ -63,12 +62,14 @@ public class NetworkLayer {
         this.activation = activation;
         this.numInputs = inputs;
         this.numOutputs = neurons;
-        this.gradientsW = NArray.CreateZeros(neurons, inputs);
-        this.gradientsB = NArray.CreateZeros(neurons);
         this.prevLayer = null;
         this.nextLayer = null;
 
         this.neurons = neurons;
+    }
+
+    public int getNeurons() {
+        return this.neurons;
     }
 
     /**
