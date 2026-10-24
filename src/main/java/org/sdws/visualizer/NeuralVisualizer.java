@@ -24,6 +24,9 @@ public class NeuralVisualizer extends Application {
     protected static NeuralNetwork neuralNetwork = null;
     private static VBox[] layerBoxes;
 
+    private static double WIDTH = 0;
+    private static double HEIGHT = 0;
+
     public static void run(NeuralNetwork network) {
         neuralNetwork = network;
         launch(NeuralVisualizer.class);
@@ -36,17 +39,14 @@ public class NeuralVisualizer extends Application {
             return;
         }
 
-        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        double WIDTH_RES = visualBounds.getWidth();
-        double HEIGHT_RES = visualBounds.getHeight();
-        System.out.println("width: " + WIDTH_RES + " height: " + HEIGHT_RES);
+        initBounds();
 
-        double netDiagramHeight = HEIGHT_RES - (HEIGHT_RES * 0.3);
+        double netDiagramHeight = HEIGHT - (HEIGHT * 0.3);
         layerBoxes = new VBox[neuralNetwork.getLayers().size()];
 
         ArrayList<NetworkLayer> layers = neuralNetwork.getLayers();
         for (NetworkLayer layer : layers) {
-            System.out.println(layer.neurons);
+            System.out.println(layer.getNeurons());
         }
 
         ScrollPane scrollPane = new ScrollPane();
@@ -66,10 +66,10 @@ public class NeuralVisualizer extends Application {
         holder.setBackground(Background.EMPTY);
         holder.getChildren().add(layerBox);
         holder.setPadding(new Insets(
-                HEIGHT_RES - (HEIGHT_RES * 0.95),
-                WIDTH_RES - (WIDTH_RES * 0.9),
-                HEIGHT_RES - (HEIGHT_RES * 0.95),
-                WIDTH_RES - (WIDTH_RES * 0.9)));
+                HEIGHT - (HEIGHT * 0.95),
+                WIDTH - (WIDTH * 0.9),
+                HEIGHT - (HEIGHT * 0.95),
+                WIDTH - (WIDTH * 0.9)));
 
         scrollPane.setContent(holder);
         scrollPane.setFitToHeight(true);
@@ -79,7 +79,7 @@ public class NeuralVisualizer extends Application {
         inputLayer.setAlignment(Pos.CENTER);
         inputLayer.setSpacing(30);
 
-        for (int i = 0; i < neuralNetwork.getInput().innerArray().size(); i++) {
+        for (int i = 0; i < neuralNetwork.getInput().getVecArray().length; i++) {
             Rectangle rectangle = new Rectangle();
             rectangle.setFill(Color.GREEN);
             rectangle.setWidth(35);
@@ -95,7 +95,7 @@ public class NeuralVisualizer extends Application {
             neuronBox.setAlignment(Pos.CENTER);
             neuronBox.setSpacing(30);
 
-            for (int j = 0; j < layers.get(i).neurons; j++) {
+            for (int j = 0; j < layers.get(i).getNeurons(); j++) {
                 Circle circle = new Circle();
                 circle.setFill(Color.GREEN);
                 circle.setRadius(20);
@@ -121,5 +121,11 @@ public class NeuralVisualizer extends Application {
         primaryStage.setTitle("Visualizer");
         primaryStage.setMaximized(true);
         primaryStage.show();
+    }
+
+    private static void initBounds() {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        WIDTH = visualBounds.getWidth();
+        HEIGHT = visualBounds.getHeight();
     }
 }
