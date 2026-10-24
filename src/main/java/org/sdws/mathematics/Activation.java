@@ -14,7 +14,12 @@ public class Activation {
      * @param input a 'NNArray' object
      */
     public static void ReLU(NArray input) {
-        recurseAFunction(input.innerArray(), ActivationFunc.ReLU);
+        if (input.dimension == 1) {
+            mutateVectorActivation(input, ActivationFunc.ReLU);
+        } else {
+            mutateMatrixActivation(input, ActivationFunc.ReLU);
+        }
+        //recurseAFunction(input.innerArray(), ActivationFunc.ReLU);
     }
 
     /**
@@ -25,7 +30,12 @@ public class Activation {
      * @param input a 'NNArray' object
      */
     public static void Sigmoid(NArray input) {
-        recurseAFunction(input.innerArray(), ActivationFunc.Sigmoid);
+        if (input.dimension == 1) {
+            mutateVectorActivation(input, ActivationFunc.Sigmoid);
+        } else {
+            mutateMatrixActivation(input, ActivationFunc.Sigmoid);
+        }
+        //recurseAFunction(input.innerArray(), ActivationFunc.Sigmoid);
     }
 
     /**
@@ -37,7 +47,12 @@ public class Activation {
      * @param input a 'NNArray' object
      */
     public static void Step(NArray input) {
-        recurseAFunction(input.innerArray(), ActivationFunc.Step);
+        if (input.dimension == 1) {
+            mutateVectorActivation(input, ActivationFunc.Step);
+        } else {
+            mutateMatrixActivation(input, ActivationFunc.Step);
+        }
+        //recurseAFunction(input.innerArray(), ActivationFunc.Step);
     }
 
     /**
@@ -46,193 +61,182 @@ public class Activation {
      * @param input a 'NNArray' object
      */
     public static void Softmax(NArray input) {
-        recurseSoftmaxAlgo(input.innerArray());
+        if (input.dimension == 1) {
+            softmaxVector(input);
+        } else {
+            softmaxMatrix(input);
+        }
+        //recurseSoftmaxAlgo(input.innerArray());
     }
 
-    private static void recurseSoftmaxAlgo(Object input) {
-        if (input instanceof Number) {
-            return;
-        }
-
-        ArrayList<?> list = (ArrayList<?>) input;
-        Class<?> type = list.get(0).getClass();
-        Number max = Float.NEGATIVE_INFINITY;
-        float sum = 0f;
+    private static void softmaxVector(NArray vec) {
+        int n = vec.getVecArray().length;
+        float max = Float.NEGATIVE_INFINITY;
 
         // determine max value within array to avoid overflow
-        if (type.equals(Float.class)) {
-            max = Collections.max((ArrayList<Float>) list);
-        } else if (type.equals(Double.class)) {
-            max = Collections.max((ArrayList<Double>) list);
-        } else if (type.equals(Integer.class)) {
-            max = Collections.max((ArrayList<Integer>) list);
-        } else if (type.equals(Long.class)) {
-            max = Collections.max((ArrayList<Long>) list);
-        } else if (type.equals(Short.class)) {
-            max = Collections.max((ArrayList<Short>) list);
-        } else if (type.equals(Byte.class)) {
-            max = Collections.max((ArrayList<Byte>) list);
-        }
-
-        // subtract each elem by max
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-
-            if (element instanceof Number) {
-                ((ArrayList<Number>) list).set(i, ((float) ((ArrayList<Number>) list).get(i)) - max.floatValue());
-
-                float exponentiated = (float) Math.exp((float)((ArrayList<Number>) list).get(i));
-                ((ArrayList<Number>) list).set(i, exponentiated);
-                sum += exponentiated;
-            } else {
-                recurseSoftmaxAlgo(element);
+        for (int i = 0; i < n; i++) {
+            float val = vec.get(i);
+            if (val > max) {
+                max = val;
             }
         }
 
-        // divide by sum
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
+        // subtract each elem by max while applying exponentiation and sum accumulation
+        float sum = 0f;
+        for (int i = 0; i < n; i++) {
+            float exp = (float) Math.exp(vec.get(i) - max);
+            vec.set(i, exp);
+            sum += exp;
+        }
 
-            if (element instanceof Number) {
-                ((ArrayList<Number>) list).set(i, ((Number) element).floatValue() / sum);
-            } else {
-                recurseSoftmaxAlgo(element);
+        // divide by sum for final softmax output
+        for (int i = 0; i < n; i++) {
+            vec.set(i, vec.get(i) / sum);
+        }
+    }
+
+    private static void softmaxMatrix(NArray matrix) {
+        int rows = matrix.shape[0];
+        int cols = matrix.shape[1];
+
+        for (int i = 0; i < rows; i++) {
+            // determine max in row to avoid overflow
+            float max = Float.NEGATIVE_INFINITY;
+            for (int j = 0; j < cols; j++) {
+                float val = matrix.get(i, j);
+                if (val > max) {
+                    max = val;
+                }
+            }
+
+            // subtract each elem by max while applying exponentiation and sum accumulation for this row
+            float sum = 0f;
+            for (int j = 0; j < cols; j++) {
+                float exp = (float) Math.exp(matrix.get(i, j) - max);
+                matrix.set(i, j, exp);
+                sum += exp;
+            }
+
+            // divide by sum for final softmax output for this row
+            for (int j = 0; j < cols; j++) {
+                matrix.set(i, j, matrix.get(i, j) / sum);
             }
         }
     }
 
-//    private static void recurseSoftmax(Object input) {
-//        if (input instanceof Float) {
+//    private static void recurseSoftmaxAlgo(Object input) {
+//        if (input instanceof Number) {
 //            return;
 //        }
 //
-//        List<?> list = (List<?>) input;
+//        ArrayList<?> list = (ArrayList<?>) input;
+//        Class<?> type = list.get(0).getClass();
+//        Number max = Float.NEGATIVE_INFINITY;
 //        float sum = 0f;
-//        float max = Float.NEGATIVE_INFINITY;
 //
 //        // determine max value within array to avoid overflow
-//        for (int i = 0; i < list.size(); i++) {
-//            Object element = list.get(i);
-//
-//            if (element instanceof Float f) {
-//                if (f > max) {
-//                    max = f;
-//                }
-//            } else {
-//                recurseSoftmax(element);
-//            }
+//        if (type.equals(Float.class)) {
+//            max = Collections.max((ArrayList<Float>) list);
+//        } else if (type.equals(Double.class)) {
+//            max = Collections.max((ArrayList<Double>) list);
+//        } else if (type.equals(Integer.class)) {
+//            max = Collections.max((ArrayList<Integer>) list);
+//        } else if (type.equals(Long.class)) {
+//            max = Collections.max((ArrayList<Long>) list);
+//        } else if (type.equals(Short.class)) {
+//            max = Collections.max((ArrayList<Short>) list);
+//        } else if (type.equals(Byte.class)) {
+//            max = Collections.max((ArrayList<Byte>) list);
 //        }
 //
-//        // subtract values by max and exponentiate for softmax algo
+//        // subtract each elem by max
 //        for (int i = 0; i < list.size(); i++) {
 //            Object element = list.get(i);
 //
-//            if (element instanceof Float) {
-//                ((List<Float>) list).set(i, ((List<Float>) list).get(i) - max);
+//            if (element instanceof Number) {
+//                ((ArrayList<Number>) list).set(i, ((float) ((ArrayList<Number>) list).get(i)) - max.floatValue());
 //
-//                float exponentiated = (float) Math.exp(((List<Float>) list).get(i));
-//                ((List<Float>) list).set(i, exponentiated);
+//                float exponentiated = (float) Math.exp((float)((ArrayList<Number>) list).get(i));
+//                ((ArrayList<Number>) list).set(i, exponentiated);
 //                sum += exponentiated;
 //            } else {
-//                recurseSoftmax(element);
+//                recurseSoftmaxAlgo(element);
 //            }
 //        }
 //
-//        // divide each value by accumulated sum for softmax algo
+//        // divide by sum
 //        for (int i = 0; i < list.size(); i++) {
 //            Object element = list.get(i);
 //
-//            if (element instanceof Float f) {
-//                float finalVal = f / sum;
-//                ((List<Float>) list).set(i, Math.round(finalVal * 10000) / 10000f);
+//            if (element instanceof Number) {
+//                ((ArrayList<Number>) list).set(i, ((Number) element).floatValue() / sum);
 //            } else {
-//                recurseSoftmax(element);
+//                recurseSoftmaxAlgo(element);
 //            }
 //        }
 //    }
 
-    private static void recurseAFunction(Object input, ActivationFunc function) {
-        if (input instanceof Number) {
-            return;
-        }
-
-        ArrayList<?> list = (ArrayList<?>) input;
-
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-            if (element instanceof Number e) {
-                switch (function) {
-                    case ReLU -> {
-                        ((ArrayList<Float>) list).set(i, Math.max(0, (Float) e));
-                    }
-                    case Sigmoid -> {
-                        ((ArrayList<Float>) list).set(i, (float) (1 / (1 + Math.exp(-(Float) e))));
-                    }
-                    case Step -> {
-                        ((ArrayList<Float>) list).set(i, (Float) e < 0 ? 0 : 1f);
-                    }
+    private static void mutateVectorActivation(NArray vec, ActivationFunc func) {
+        for (int i = 0; i < vec.getVecArray().length; i++) {
+            float val = vec.get(i);
+            switch (func) {
+                case Sigmoid: {
+                    vec.set(i, (float) (1 / (1 + Math.exp(-val))));
                 }
-//                switch (element.getClass().getSimpleName()) {
-//                    case "Float" -> mutateArrayValues(list, element, Float.class, function);
-//                    case "Double" -> mutateArrayValues(list, element, Double.class, function);
-//                    case "Integer" -> mutateArrayValues(list, element, Integer.class, function);
-//                    case "Long" -> mutateArrayValues(list, element, Long.class, function);
-//                    case "Short" -> mutateArrayValues(list, element, Short.class, function);
-//                    case "Byte" -> mutateArrayValues(list, element, Byte.class, function);
-//                }
-            } else {
-                recurseAFunction(list.get(i), function);
+                case Step: {
+                    vec.set(i, val < 0 ? 0 : 1f);
+                }
+                case ReLU: {
+                    vec.set(i, Math.max(0, val));
+                }
             }
         }
     }
 
-//    private static void mutateArrayValues(ArrayList<?> array, Object value, Class<?> type, ActivationFunc function) {
-//        int i = array.indexOf(value); // store index due to being out of loop scope
-//        switch (function) {
-//            case ReLU -> {
-//                if (type.equals(Float.class)) {
-//                    ((ArrayList<Float>) array).set(i, Math.max(0, (Float) value));
-//                } else if (type.equals(Double.class)) {
-//                    ((ArrayList<Double>) array).set(i, Math.max(0, (Double) value));
-//                } else if (type.equals(Integer.class)) {
-//                    ((ArrayList<Integer>) array).set(i, Math.max(0, (Integer) value));
-//                } else if (type.equals(Long.class)) {
-//                    ((ArrayList<Long>) array).set(i, Math.max(0, (Long) value));
-//                } else if (type.equals(Short.class)) {
-//                    ((ArrayList<Short>) array).set(i, (short) Math.max(0, (Short) value));
-//                } else if (type.equals(Byte.class)) {
-//                    ((ArrayList<Byte>) array).set(i, (byte) Math.max(0, (Byte) value));
+    private static void mutateMatrixActivation(NArray matrix, ActivationFunc func) {
+        float[][] array = matrix.getMatrixArray();
+
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[i].length; j++) {
+                float val = array[i][j];
+                switch (func) {
+                    case Sigmoid: {
+                        matrix.set(i, j, (float) (1 / (1 + Math.exp(-val))));
+                    }
+                    case Step: {
+                        matrix.set(i, j, val < 0 ? 0 : 1f);
+                    }
+                    case ReLU: {
+                        matrix.set(i, j, Math.max(0, val));
+                    }
+                }
+            }
+        }
+    }
+
+//    private static void recurseAFunction(Object input, ActivationFunc function) {
+//        if (input instanceof Number) {
+//            return;
+//        }
+//
+//        ArrayList<?> list = (ArrayList<?>) input;
+//
+//        for (int i = 0; i < list.size(); i++) {
+//            Object element = list.get(i);
+//            if (element instanceof Number e) {
+//                switch (function) {
+//                    case ReLU -> {
+//                        ((ArrayList<Float>) list).set(i, Math.max(0, (Float) e));
+//                    }
+//                    case Sigmoid -> {
+//                        ((ArrayList<Float>) list).set(i, (float) (1 / (1 + Math.exp(-(Float) e))));
+//                    }
+//                    case Step -> {
+//                        ((ArrayList<Float>) list).set(i, (Float) e < 0 ? 0 : 1f);
+//                    }
 //                }
-//            }
-//            case Sigmoid -> {
-//                if (type.equals(Float.class)) {
-//                    ((ArrayList<Float>) array).set(i, (float) (1 / (1 + Math.exp(-(Float) value))));
-//                } else if (type.equals(Double.class)) {
-//                    ((ArrayList<Double>) array).set(i, 1 / (1 + Math.exp(-(Double) value)));
-//                } else if (type.equals(Integer.class)) {
-//                    ((ArrayList<Integer>) array).set(i, (int) (1 / (1 + Math.exp(-(Integer) value))));
-//                } else if (type.equals(Long.class)) {
-//                    ((ArrayList<Long>) array).set(i, (long) (1 / (1 + Math.exp(-(Long) value))));
-//                } else if (type.equals(Short.class)) {
-//                    ((ArrayList<Short>) array).set(i, (short) (1 / (1 + Math.exp(-(Short) value))));
-//                } else if (type.equals(Byte.class)) {
-//                    ((ArrayList<Byte>) array).set(i, (byte) (1 / (1 + Math.exp(-(Byte) value))));
-//                }
-//            }
-//            case Step -> {
-//                if (type.equals(Float.class)) {
-//                    ((ArrayList<Float>) array).set(i, (Float) value < 0 ? 0 : 1f);
-//                } else if (type.equals(Double.class)) {
-//                    ((ArrayList<Double>) array).set(i, (Double) value < 0 ? 0 : 1d);
-//                } else if (type.equals(Integer.class)) {
-//                    ((ArrayList<Integer>) array).set(i, (int) value < 0 ? 0 : 1);
-//                } else if (type.equals(Long.class)) {
-//                    ((ArrayList<Long>) array).set(i, (long) value < 0 ? 0 : 1L);
-//                } else if (type.equals(Short.class)) {
-//                    ((ArrayList<Short>) array).set(i, (short) ((short) value < 0 ? 0 : 1));
-//                } else if (type.equals(Byte.class)) {
-//                    ((ArrayList<Byte>) array).set(i, (byte) ((byte) value < 0 ? 0 : 1));
-//                }
+//            } else {
+//                recurseAFunction(list.get(i), function);
 //            }
 //        }
 //    }
