@@ -96,11 +96,9 @@ public class NetworkLayer {
      */
     protected void forwardPass(NArray input) {
         this.calculateOutput(input);
-        System.out.println("\nOUTPUT (pre): " + this.preActivationOutput+"\n");
         this.postActivationOutput = NArray.DeepCopy(this.preActivationOutput);
 
         if (this.activation.equals(ActivationFunc.None)) {
-            System.out.println("\nOUTPUT: " + this.postActivationOutput +"\n");
             return;
         }
 
@@ -109,9 +107,6 @@ public class NetworkLayer {
             case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
             case Softmax -> Activation.Softmax(this.postActivationOutput);
         }
-
-        System.out.println("\nOUTPUT (post): " + this.postActivationOutput+"\n");
-        System.out.println(this.toString());
     }
 
     private void calculateOutput(NArray input) {
