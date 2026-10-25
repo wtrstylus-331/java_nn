@@ -14,7 +14,7 @@ public class NetworkLayer {
 
     protected NetworkLayer prevLayer, nextLayer;
 
-    protected NArray neuronDeltas;
+    protected NArray neuronDeltas, weightGrads, biasGrads;
 
     protected int neurons;
 
@@ -38,7 +38,10 @@ public class NetworkLayer {
         this.numOutputs = neurons;
         this.prevLayer = null;
         this.nextLayer = null;
+
         this.neuronDeltas = NArray.CreateZeros(neurons);
+        this.weightGrads = NArray.CreateZeros(neurons, inputs);
+        this.biasGrads = NArray.CreateZeros(neurons);
 
         this.neurons = neurons;
     }
@@ -64,7 +67,10 @@ public class NetworkLayer {
         this.numOutputs = neurons;
         this.prevLayer = null;
         this.nextLayer = null;
+
         this.neuronDeltas = NArray.CreateZeros(neurons);
+        this.weightGrads = NArray.CreateZeros(neurons, inputs);
+        this.biasGrads = NArray.CreateZeros(neurons);
 
         this.neurons = neurons;
     }
@@ -105,6 +111,7 @@ public class NetworkLayer {
         }
 
         System.out.println("\nOUTPUT (post): " + this.postActivationOutput+"\n");
+        System.out.println(this.toString());
     }
 
     private void calculateOutput(NArray input) {
@@ -117,8 +124,14 @@ public class NetworkLayer {
         return "==========================\n" +
                 "Weights:\n" +
                 this.weights + "\n" +
+                "Weight grads:\n" +
+                this.weightGrads + "\n" +
                 "Biases:\n" +
                 this.biases + "\n" +
+                "Bias grads:\n" +
+                this.biasGrads + "\n" +
+                "Neuron deltas:\n" +
+                this.neuronDeltas + "\n" +
                 "==========================";
     }
 }
