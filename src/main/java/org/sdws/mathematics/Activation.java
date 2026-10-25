@@ -1,9 +1,6 @@
 package org.sdws.mathematics;
 
 import org.sdws.util.ActivationFunc;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Activation {
     /**
@@ -11,7 +8,7 @@ public class Activation {
      * which can also be expressed as:
      * <p><code>Math.max(0, x)</code> for any real number <code>x</code>. <p>This function mutates
      * an input matrix in place by applying the ReLU function to each value in the matrix.
-     * @param input a 'NNArray' object
+     * @param input a 'NArray' object
      */
     public static void ReLU(NArray input) {
         if (input.dimension == 1) {
@@ -19,7 +16,10 @@ public class Activation {
         } else {
             mutateMatrixActivation(input, ActivationFunc.ReLU);
         }
-        //recurseAFunction(input.innerArray(), ActivationFunc.ReLU);
+    }
+
+    public static float derivativeReLU(float input) {
+        return input > 0 ? 1 : 0;
     }
 
     /**
@@ -27,7 +27,7 @@ public class Activation {
      * {@link <a href="https://en.wikipedia.org/wiki/Sigmoid_function">Sigmoid function</a>}
      * to each value in the matrix, which is mathematically expressed as:
      * <p><code>1</code> / <code>(1 + Math.exp(-x))</code>, for any real number <code>x</code>.
-     * @param input a 'NNArray' object
+     * @param input a 'NArray' object
      */
     public static void Sigmoid(NArray input) {
         if (input.dimension == 1) {
@@ -35,30 +35,16 @@ public class Activation {
         } else {
             mutateMatrixActivation(input, ActivationFunc.Sigmoid);
         }
-        //recurseAFunction(input.innerArray(), ActivationFunc.Sigmoid);
     }
 
-    /**
-     * This function mutates an input matrix in place
-     * to each value in the matrix while applying the following function:
-     * <p> f(x):
-     * <p><code>0</code> if x <= 0
-     * <p><code>1</code> if x > 0
-     * @param input a 'NNArray' object
-     */
-    public static void Step(NArray input) {
-        if (input.dimension == 1) {
-            mutateVectorActivation(input, ActivationFunc.Step);
-        } else {
-            mutateMatrixActivation(input, ActivationFunc.Step);
-        }
-        //recurseAFunction(input.innerArray(), ActivationFunc.Step);
+    public static float derivativeSigmoid(float input) {
+        return input * (1 - input);
     }
 
     /**
      * Uses the Softmax algorithm to compute outputs into a probability distribution
      * represented via floats, by mutating the input matrix in place.
-     * @param input a 'NNArray' object
+     * @param input a 'NArray' object
      */
     public static void Softmax(NArray input) {
         if (input.dimension == 1) {
@@ -66,7 +52,6 @@ public class Activation {
         } else {
             softmaxMatrix(input);
         }
-        //recurseSoftmaxAlgo(input.innerArray());
     }
 
     private static void softmaxVector(NArray vec) {
@@ -124,67 +109,12 @@ public class Activation {
         }
     }
 
-//    private static void recurseSoftmaxAlgo(Object input) {
-//        if (input instanceof Number) {
-//            return;
-//        }
-//
-//        ArrayList<?> list = (ArrayList<?>) input;
-//        Class<?> type = list.get(0).getClass();
-//        Number max = Float.NEGATIVE_INFINITY;
-//        float sum = 0f;
-//
-//        // determine max value within array to avoid overflow
-//        if (type.equals(Float.class)) {
-//            max = Collections.max((ArrayList<Float>) list);
-//        } else if (type.equals(Double.class)) {
-//            max = Collections.max((ArrayList<Double>) list);
-//        } else if (type.equals(Integer.class)) {
-//            max = Collections.max((ArrayList<Integer>) list);
-//        } else if (type.equals(Long.class)) {
-//            max = Collections.max((ArrayList<Long>) list);
-//        } else if (type.equals(Short.class)) {
-//            max = Collections.max((ArrayList<Short>) list);
-//        } else if (type.equals(Byte.class)) {
-//            max = Collections.max((ArrayList<Byte>) list);
-//        }
-//
-//        // subtract each elem by max
-//        for (int i = 0; i < list.size(); i++) {
-//            Object element = list.get(i);
-//
-//            if (element instanceof Number) {
-//                ((ArrayList<Number>) list).set(i, ((float) ((ArrayList<Number>) list).get(i)) - max.floatValue());
-//
-//                float exponentiated = (float) Math.exp((float)((ArrayList<Number>) list).get(i));
-//                ((ArrayList<Number>) list).set(i, exponentiated);
-//                sum += exponentiated;
-//            } else {
-//                recurseSoftmaxAlgo(element);
-//            }
-//        }
-//
-//        // divide by sum
-//        for (int i = 0; i < list.size(); i++) {
-//            Object element = list.get(i);
-//
-//            if (element instanceof Number) {
-//                ((ArrayList<Number>) list).set(i, ((Number) element).floatValue() / sum);
-//            } else {
-//                recurseSoftmaxAlgo(element);
-//            }
-//        }
-//    }
-
     private static void mutateVectorActivation(NArray vec, ActivationFunc func) {
         for (int i = 0; i < vec.getVecArray().length; i++) {
             float val = vec.get(i);
             switch (func) {
                 case Sigmoid: {
                     vec.set(i, (float) (1 / (1 + Math.exp(-val))));
-                }
-                case Step: {
-                    vec.set(i, val < 0 ? 0 : 1f);
                 }
                 case ReLU: {
                     vec.set(i, Math.max(0, val));
@@ -203,9 +133,6 @@ public class Activation {
                     case Sigmoid: {
                         matrix.set(i, j, (float) (1 / (1 + Math.exp(-val))));
                     }
-                    case Step: {
-                        matrix.set(i, j, val < 0 ? 0 : 1f);
-                    }
                     case ReLU: {
                         matrix.set(i, j, Math.max(0, val));
                     }
@@ -213,31 +140,4 @@ public class Activation {
             }
         }
     }
-
-//    private static void recurseAFunction(Object input, ActivationFunc function) {
-//        if (input instanceof Number) {
-//            return;
-//        }
-//
-//        ArrayList<?> list = (ArrayList<?>) input;
-//
-//        for (int i = 0; i < list.size(); i++) {
-//            Object element = list.get(i);
-//            if (element instanceof Number e) {
-//                switch (function) {
-//                    case ReLU -> {
-//                        ((ArrayList<Float>) list).set(i, Math.max(0, (Float) e));
-//                    }
-//                    case Sigmoid -> {
-//                        ((ArrayList<Float>) list).set(i, (float) (1 / (1 + Math.exp(-(Float) e))));
-//                    }
-//                    case Step -> {
-//                        ((ArrayList<Float>) list).set(i, (Float) e < 0 ? 0 : 1f);
-//                    }
-//                }
-//            } else {
-//                recurseAFunction(list.get(i), function);
-//            }
-//        }
-//    }
 }
