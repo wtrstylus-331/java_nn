@@ -1,44 +1,38 @@
 package org.sdws.nn;
 
+import org.sdws.mathematics.Activation;
 import org.sdws.util.ActivationFunc;
 import org.sdws.util.LossAlgorithm;
 import org.sdws.mathematics.NArray;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
 public class NeuralNetwork {
-    //private final ArrayList<Layer> networkLayers = new ArrayList<>(1);
-    private final ArrayList<NetworkLayer> layers;
+    private NetworkLayer[] layers;
     private LossAlgorithm lossAlgorithm;
 
-    private NArray input;
+    private NArray input, desiredOutput;
     public Object output;
 
     private float loss;
     private float learningRate;
 
     public NeuralNetwork(NetworkLayer... layers) {
-        //this.networkLayers = new ArrayList<>(List.of(layers));
-        this.layers = new ArrayList<>();
-        this.learningRate = 0.01f;
+        this.layers = new NetworkLayer[layers.length];
+        this.learningRate = 0.001f;
         this.loss = Float.NaN;
         this.lossAlgorithm = LossAlgorithm.CCELoss;
-//        this.accuracy = 0f;
         this.output = null;
-//        for (Layer layer : this.networkLayers) {
-//            System.out.println(layer.toString());
-//        }
 
         if (layers.length == 1) {
-            this.layers.add(layers[0]);
+            this.layers[0] = layers[0];
         } else if (layers.length == 2) {
-            this.layers.add(layers[0]);
-            this.layers.add(layers[1]);
+            this.layers[0] = layers[0];
+            this.layers[1] = layers[1];
 
-            this.layers.get(0).nextLayer = this.layers.get(1);
-            this.layers.get(1).prevLayer = this.layers.get(0);
+            this.layers[0].nextLayer = this.layers[1];
+            this.layers[1].prevLayer = this.layers[0];
         } else {
             for (int i = 0; i < layers.length; i++) {
                 NetworkLayer layer = layers[i];
@@ -52,27 +46,26 @@ public class NeuralNetwork {
                     layer.nextLayer = layers[i + 1];
                 }
 
-                this.layers.add(layer);
+                this.layers[i] = layer;
             }
         }
     }
 
     public NeuralNetwork(float learningRate, LossAlgorithm lossAlg, NetworkLayer... layers) {
-        //this.networkLayers = new ArrayList<>(List.of(layers));
-        this.layers = new ArrayList<>();
+        this.layers = new NetworkLayer[layers.length];
         this.learningRate = learningRate;
         this.loss = Float.NaN;
         this.lossAlgorithm = lossAlg;
         this.output = null;
 
         if (layers.length == 1) {
-            this.layers.add(layers[0]);
+            this.layers[0] = layers[0];
         } else if (layers.length == 2) {
-            this.layers.add(layers[0]);
-            this.layers.add(layers[1]);
+            this.layers[0] = layers[0];
+            this.layers[1] = layers[1];
 
-            this.layers.get(0).nextLayer = this.layers.get(1);
-            this.layers.get(1).prevLayer = this.layers.get(0);
+            this.layers[0].nextLayer = this.layers[1];
+            this.layers[1].prevLayer = this.layers[0];
         } else {
             for (int i = 0; i < layers.length; i++) {
                 NetworkLayer layer = layers[i];
@@ -86,7 +79,7 @@ public class NeuralNetwork {
                     layer.nextLayer = layers[i + 1];
                 }
 
-                this.layers.add(layer);
+                this.layers[i] = layer;
             }
         }
     }
@@ -111,7 +104,7 @@ public class NeuralNetwork {
         return this.loss;
     }
 
-    public ArrayList<NetworkLayer> getLayers() {
+    public NetworkLayer[] getLayers() {
         return this.layers;
     }
 
@@ -123,6 +116,22 @@ public class NeuralNetwork {
         return this.input;
     }
 
+    public void setDesiredOutput(NArray desiredOutput) {
+        this.desiredOutput = desiredOutput;
+    }
+
+    public NArray getDesiredOutput() {
+        return this.desiredOutput;
+    }
+
+    public void erase() {
+        this.layers = null;
+        this.output = null;
+        this.loss = Float.NaN;
+        this.learningRate = 0.001f;
+        this.lossAlgorithm = null;
+    }
+
     public void forwardPass() {
         if (this.input == null) return;
 
@@ -130,7 +139,7 @@ public class NeuralNetwork {
             default: {  // single vector input
                 NArray prevOutput = this.input;
                 for (NetworkLayer layer : this.layers) {
-                    layer.ForwardPass(prevOutput);
+                    layer.forwardPass(prevOutput);
                     prevOutput = layer.postActivationOutput;
                 }
 
@@ -139,12 +148,12 @@ public class NeuralNetwork {
             }
             case 2: {   // batch of vectors (matrix) as input
                 float[][] batch = this.input.getMatrixArray();
-                float[][] batchOutput = new float[batch.length][this.layers.get(this.layers.size() - 1).getNeurons()];
+                float[][] batchOutput = new float[batch.length][this.layers[this.layers.length - 1].getNeurons()];
 
                 for (int i = 0; i < batch.length; i++) {
                     NArray prevOutput = NArray.FromRows(batch[i]);
                     for (NetworkLayer layer : this.layers) {
-                        layer.ForwardPass(prevOutput);
+                        layer.forwardPass(prevOutput);
                         prevOutput = layer.postActivationOutput;
                     }
 
@@ -157,81 +166,49 @@ public class NeuralNetwork {
         }
     }
 
-//    public void forwardPass() {
-//        if (this.input == null) {
-//            return;
-//        }
-//
-//        if (this.input.dimension == 1) {
-//            NArray prevOutput = this.input;
-//            for (NetworkLayer layer : this.layers) {
-//                layer.ForwardPass(prevOutput);
-//                prevOutput = layer.postActivationOutput;
-//            }
-//
-//            this.output = prevOutput;
-//        } else if (this.input.dimension == 2) {
-//            ArrayList<ArrayList<Number>> batch = (ArrayList<ArrayList<Number>>) this.input.innerArray();
-//            ArrayList<ArrayList<Number>> batchOutput = new ArrayList<>();
-//
-//            for (ArrayList<Number> vec : batch) {
-//                NArray prevOutput = NArray.FromCollection(vec);
-//                for (NetworkLayer layer : this.layers) {
-//                    layer.ForwardPass(prevOutput);
-//                    prevOutput = layer.postActivationOutput;
-//                }
-//
-//                batchOutput.add((ArrayList<Number>) prevOutput.innerArray());
-//            }
-//
-//            this.output = NArray.FromNested(batchOutput);
-//        }
-//    }
-
-    public void backwardPass() {
+    public void backwardPass(NArray desiredOutput) {
         if (this.input == null || this.output == null) {
             return;
         }
+
+        switch (this.lossAlgorithm) {
+            case CCELoss: {
+                if (this.layers[this.layers.length - 1].activation == ActivationFunc.Softmax) {
+                    this.backpropCCESoftmax(desiredOutput);
+                }
+            }
+            case MSELoss: {
+
+            }
+        }
     }
 
-//    public void feedForward(NArray input) {
-//        if (input == null) {
-//            return;
-//        }
-//
-//        if (input.dimension == 1) {
-//            NArray prevOutput = input;
-//            for (NetworkLayer layer : this.layers) {
-//                layer.ForwardPass(prevOutput);
-//                prevOutput = layer.postActivationOutput;
-//            }
-//
-//            this.output = prevOutput;
-//        } else if (input.dimension == 2) {
-//            ArrayList<ArrayList<Number>> batch = (ArrayList<ArrayList<Number>>) input.innerArray();
-//            ArrayList<ArrayList<Number>> batchOutput = new ArrayList<>();
-//
-//            for (ArrayList<Number> vec : batch) {
-//                NArray prevOutput = NArray.FromCollection(vec);
-//                for (NetworkLayer layer : this.layers) {
-//                    layer.ForwardPass(prevOutput);
-//                    prevOutput = layer.postActivationOutput;
-//                }
-//
-//                batchOutput.add((ArrayList<Number>) prevOutput.innerArray());
-//            }
-//
-//            this.output = NArray.FromNested(batchOutput);
-//        }
-//    }
+    private void backpropCCESoftmax(NArray desiredOutput) {
+        for (int i = this.layers.length - 1; i >= 0; i--) {
+            NetworkLayer layer = layers[i];
 
-    public void erase() {
-        this.layers.clear();
-        this.output = null;
-        this.loss = Float.NaN;
-        this.learningRate = 0.001f;
-        this.lossAlgorithm = null;
-//        this.accuracy = 0f;
+            if (i == this.layers.length - 1) {
+                for (int j = 0; j < layer.getNeurons(); j++) {
+                    float val = (layer.postActivationOutput.get(j) - desiredOutput.get(j));
+                    val = val == -0.0f ? 0.0f : val;
+                    layer.neuronDeltas.set(j, val);
+                }
+//            } else if (i == 0) {
+//                break;
+            } else {
+                for (int j = 0; j < layer.getNeurons(); j++) {
+                    float summation = 0f;
+                    for (int k = 0; k < layer.nextLayer.neurons; k++) {
+                        summation += layer.nextLayer.neuronDeltas.get(k) * layer.nextLayer.weights.get(k, j);
+                    }
+
+                    float val = summation * Activation.derivativeReLU(layer.postActivationOutput.get(j));
+                    val = val == -0.0f ? 0.0f : val;
+                    layer.neuronDeltas.set(j, val);
+                }
+            }
+            System.out.println(layer.neuronDeltas);
+        }
     }
 
     /**
@@ -250,8 +227,6 @@ public class NeuralNetwork {
             case BCELoss -> calculateBCE(desiredOutput);
             default -> calculateMSE(desiredOutput);
         }
-
-        //this.calculateAccuracy(desiredOutput, lossAlgorithm);
     }
 
     /**
@@ -283,31 +258,6 @@ public class NeuralNetwork {
         } else {
             throw new IllegalArgumentException("Desired output must be either 0.0 or 1.0.");
         }
-
-//        this.loss = desiredOutput * (float)Math.log(((Number) this.output).floatValue()) +
-//                (1 - desiredOutput.floatValue()) * (float)Math.log(1 - ((Number) this.output).floatValue());
-
-//        if (((Number)this.output).getClass().equals(Float.class)) {
-//            this.loss = desiredOutput.floatValue() *
-//                    (float)Math.log(this.loss) + (1 - desiredOutput.floatValue()) * (float) Math.log(1 - this.loss);
-//        } else if (((Number)this.output).getClass().equals(Double.class)) {
-//            this.loss = (float) (desiredOutput.doubleValue() *
-//                    Math.log(this.loss) + (1 - desiredOutput.doubleValue()) * Math.log(1 - this.loss));
-//        } else if (((Number)this.output).getClass().equals(Integer.class)) {
-//            this.loss = (desiredOutput.intValue() *
-//                    (float)Math.log(this.loss) + (1 - desiredOutput.intValue()) * (float)Math.log(1 - this.loss));
-//        } else if (((Number)this.output).getClass().equals(Long.class)) {
-//            this.loss = (desiredOutput.longValue() *
-//                    (float)Math.log(this.loss) + (1 - desiredOutput.longValue()) * (float)Math.log(1 - this.loss));
-//        } else if (((Number)this.output).getClass().equals(Short.class)) {
-//            this.loss = (desiredOutput.shortValue() *
-//                    (float)Math.log(this.loss) + (1 - desiredOutput.shortValue()) * (float)Math.log(1 - this.loss));
-//        } else if (((Number)this.output).getClass().equals(Byte.class)) {
-//            this.loss = (desiredOutput.byteValue() *
-//                    (float)Math.log(this.loss) + (1 - desiredOutput.byteValue()) * (float)Math.log(1 - this.loss));
-//        } else {
-//            throw new IllegalArgumentException("Cannot compute BCE Loss of a non-numeric value from the actual binary label argument.");
-//        }
     }
 
     private void calculateBCE(NArray desiredOutput) {
@@ -362,7 +312,6 @@ public class NeuralNetwork {
         } else {
             throw new IllegalArgumentException("Desired output must be either 0.0 or 1.0.");
         }
-//        this.loss = -desiredOutput.floatValue() * (float) Math.log((Float)this.output);
     }
 
     private void calculateCCE(NArray desiredOutput) {
@@ -388,37 +337,10 @@ public class NeuralNetwork {
             }
 
             this.loss = (float) -Math.log(((NArray)this.output).get(index));
-
-//            Class<?> type = desiredOutput.innerArray().get(0).getClass();
-//            int index;
-//
-//            if (type.equals(Float.class)) {
-//                index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((float)1);
-//            } else if (type.equals(Double.class)) {
-//                index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((double)1);
-//            } else if  (type.equals(Integer.class)) {
-//                index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf(1);
-//            } else if (type.equals(Long.class)) {
-//                index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((long)1);
-//            } else if (type.equals(Short.class)) {
-//                index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((short)1);
-//            } else if  (type.equals(Byte.class)) {
-//                index = ((ArrayList<Number>) desiredOutput.innerArray()).indexOf((byte)1);
-//            } else {
-//                throw new IllegalArgumentException("Cannot find one-hot element of a non-numeric type from desired output to calculate CCE loss.");
-//            }
-//
-//            this.loss = (float) -Math.log(((NArray<Number>)this.output).get(index).floatValue());
         } else {
             if (!Arrays.equals(((NArray) this.output).shape, desiredOutput.shape)) {
                 throw new IllegalArgumentException("One-hot batch for CCE is not equal to network output batch.");
             }
-
-//            boolean equalRows = Objects.equals(((NArray)this.output).shape.get(0), desiredOutput.shape.get(0));
-//            boolean equalCols = Objects.equals(((NArray)this.output).shape.get(1), desiredOutput.shape.get(1));
-//            if (!equalRows && !equalCols) {
-//                throw new IllegalArgumentException("One-hot matrix batch size for CCE is not equal to network batch output matrix.");
-//            }
 
             float sum = 0f;
             int n = (((NArray)this.output).shape[0]);
@@ -438,34 +360,8 @@ public class NeuralNetwork {
             }
 
             this.loss = ((float) -1/n) * sum;
-
-//            ArrayList<ArrayList<Number>> innerArray = (ArrayList<ArrayList<Number>>) desiredOutput.innerArray();
-//            Class<?> type = ((ArrayList<Number>)desiredOutput.innerArray().get(0)).get(0).getClass();
-//
-//            for (int i = 0; i < n; i++) {
-//                float clippedValue;
-//
-//                if (type.equals(Float.class) ||  type.equals(Double.class)) {
-//                    clippedValue = Util.clip(((NArray<Number>)this.output).get(i, innerArray.get(i).indexOf((float)1)).floatValue());
-//                } else if (type.equals(Integer.class)) {
-//                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf(1)).floatValue());
-//                } else if (type.equals(Long.class)) {
-//                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf(1L)).floatValue());
-//                } else if (type.equals(Short.class)) {
-//                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf((short)1)).floatValue());
-//                } else if (type.equals(Byte.class)) {
-//                    clippedValue = Util.clip(((NArray<Number>) this.output).get(i, innerArray.get(i).indexOf((byte)1)).floatValue());
-//                } else {
-//                    throw new IllegalArgumentException("Cannot find one-hot element of a non-numeric type from desired output to calculate CCE loss.");
-//                }
-//
-//                sum += (float) Math.log(clippedValue);
-//            }
-//
-//            this.loss = ((float) -1/n) * sum;
         }
     }
-
 
     private boolean validForCCE(NArray desiredOutput) {
         if (desiredOutput == null) {
@@ -484,13 +380,13 @@ public class NeuralNetwork {
             throw new IllegalArgumentException("Desired output for BCE loss must not be null.");
         }
 
-        if (!Objects.equals(this.layers.get(this.layers.size() - 1).activation, ActivationFunc.Sigmoid)) {
+        if (!Objects.equals(this.layers[this.layers.length - 1].activation, ActivationFunc.Sigmoid)) {
             throw new IllegalArgumentException(
                     "The layer being used to calculate BCE Loss must have its activation function set to the Sigmoid activation function (ActivationFunc.Sigmoid)."
             );
         }
 
-        if (!Util.constrainedForBCE(this.layers.get(this.layers.size() - 1).postActivationOutput)) {
+        if (!Util.constrainedForBCE(this.layers[this.layers.length - 1].postActivationOutput)) {
             throw new IllegalStateException(
                     "Outputs from Sigmoid activation function layer must be bounded between the open interval of (0,1) for BCE loss calculation."
             );
@@ -618,174 +514,7 @@ public class NeuralNetwork {
         return true;
     }
 
-//
-
-//    public Float calculateAccuracy(NNArray oneHotInput) {
-//        if (oneHotInput == null) {
-//            throw new IllegalArgumentException("Input for CCE must not be null");
-//        }
-//
-//        if (oneHotInput.dimension > 3) {
-//            throw new IllegalArgumentException("Input dimensions for CCE does not match network output dimension.");
-//        }
-//
-//        if (!Util.isOneHot(oneHotInput)) {
-//            throw new IllegalArgumentException("Input for CCE is not in the form of one-hot input vector.");
-//        }
-//
-//        if (this.output.dimension == 1) {
-//            int desiredIndex = oneHotInput.nnarray().indexOf((float)1);
-//            int actualIndex = 0;
-//            float max = Float.NEGATIVE_INFINITY;
-//
-//            // assumption that output is formatted into distribution from cce
-//            for (int i = 0; i < this.output.nnarray().size(); i++) {
-//                if (this.output.get(i) > max) {
-//                    actualIndex = i;
-//                    max = this.output.get(i);
-//                }
-//            }
-//
-//            if (Objects.equals(actualIndex, desiredIndex)) {
-//                return 1f;
-//            } else {
-//                return 0f;
-//            }
-//        } else {
-//            int batches = this.output.shape.get(0);
-//            int correct = 0;
-//
-//            for (int i = 0; i < this.output.shape.get(0); i++) {
-//                int desiredIndex = ((ArrayList<Float>)oneHotInput.nnarray().get(i)).indexOf((float)1);
-//                float max = Util.getMax((ArrayList<Float>) this.output.nnarray().get(i));
-//                if (((ArrayList<Float>) this.output.nnarray().get(i)).indexOf(max) == desiredIndex) {
-//                    correct++;
-//                }
-//            }
-//
-//            return (float) correct / (float) batches;
-//        }
-//    }
-
-//    private void accuracyFromCCE(NArray desiredOutput) {
-//        if (((NArray)this.output).dimension == 1) {
-//            Class<?> type = desiredOutput.get(0).getClass();
-//            int desiredIndex;
-//
-//            if (type.equals(Float.class)) {
-//                desiredIndex = desiredOutput.innerArray().indexOf((float)1);
-//            } else if (type.equals(Double.class)) {
-//                desiredIndex = desiredOutput.innerArray().indexOf((double) 1);
-//            } else if (type.equals(Integer.class)) {
-//                desiredIndex = desiredOutput.innerArray().indexOf(1);
-//            } else if (type.equals(Long.class)) {
-//                desiredIndex = desiredOutput.innerArray().indexOf(1L);
-//            } else if (type.equals(Short.class)) {
-//                desiredIndex = desiredOutput.innerArray().indexOf((short)1);
-//            } else if (type.equals(Byte.class)) {
-//                desiredIndex = desiredOutput.innerArray().indexOf((byte)1);
-//            } else {
-//                throw new IllegalArgumentException("Desired index for loss calculation (CCE) cannot be parsed from non-numeric type.");
-//            }
-//
-//            int actualIndex = 0;
-//            float max = Float.NEGATIVE_INFINITY;
-//
-//            for (int i = 0; i < ((NArray)this.output).innerArray().size(); i++) {
-//                if (((NArray)this.output).get(i).floatValue() > max) {
-//                    actualIndex = i;
-//                    max = ((NArray)this.output).get(i).floatValue();
-//                }
-//            }
-//
-//            if (Objects.equals(actualIndex, desiredIndex)) {
-//                this.accuracy = 1f;
-//            } else {
-//                this.accuracy = 0f;
-//            }
-//        } else {
-//            int batches = (int)((NArray)this.output).shape.get(0);
-//            int correct = 0;
-//
-//            for (int i = 0; i < (int)((NArray)this.output).shape.get(0); i++) {
-//                int desiredIndex = ((ArrayList<Number>)desiredOutput.innerArray().get(i)).indexOf((float)1);
-//
-//                float max = Util.getMax((ArrayList<Number>) ((NArray)this.output).innerArray().get(i));
-//                if (((ArrayList<Number>) ((NArray)this.output).innerArray().get(i)).indexOf(max) == desiredIndex) {
-//                    correct++;
-//                }
-//            }
-//
-//            this.accuracy =  (float) correct / (float) batches;
-//        }
-//    }
-//
-//    private void accuracyFromBCE(NArray desiredOutput) {
-//
-//    }
-//
-//    private void accuracyFromRMSE(NArray desiredOutput) {
-//
-//    }
-//
-//    private void accuracyFromMSE(NArray desiredOutput) {
-//
-//    }
-//
-//    private void calculateAccuracy(NArray desiredOutput, LossAlgorithm lossAlg) {
-//        switch (lossAlg) {
-//            case CrossCatEntropy -> accuracyFromCCE(desiredOutput);
-//            case BinaryCatEntropy -> accuracyFromBCE(desiredOutput);
-//            case RootMeanSqErr ->  accuracyFromRMSE(desiredOutput);
-//            default -> accuracyFromMSE(desiredOutput);
-//        }
-//    }
-
-    private void calculateGradients() {
-        for (int i = this.layers.size() - 1; i >= 0; i--) {
-            switch (this.layers.get(i).activation) {
-                default: continue;
-                case Softmax: {
-
-                }
-            }
-        }
-    }
-
     private static class Util {
-        private static Float getMax(ArrayList<Number> array) {
-            float max = Float.NEGATIVE_INFINITY;
-            Class<?> type = array.get(0).getClass();
-
-            for (int i = 0; i < array.size(); i++) {
-                if (type.equals(Float.class) || type.equals(Double.class)) {
-                    if (array.get(i).floatValue() > max) {
-                        max = array.get(i).floatValue();
-                    }
-                } else if (type.equals(Integer.class)) {
-                    if (array.get(i).intValue() > max) {
-                        max = array.get(i).intValue();
-                    }
-                } else if (type.equals(Long.class)) {
-                    if (array.get(i).longValue() > max) {
-                        max = array.get(i).longValue();
-                    }
-                } else if (type.equals(Short.class)) {
-                    if (array.get(i).shortValue() > max) {
-                        max = array.get(i).shortValue();
-                    }
-                } else if (type.equals(Byte.class)) {
-                    if (array.get(i).byteValue() > max) {
-                        max = array.get(i).byteValue();
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unable to find max element for batch loss computation (CCE).");
-                }
-            }
-
-            return max;
-        }
-
         private static Float clip(float value) {
             if (value < 1e-7f) {
                 return 1e-7f;
@@ -793,24 +522,6 @@ public class NeuralNetwork {
                 return 1f-1e-7f;
             }
             return value;
-        }
-
-        private static Double clip(double value) {
-            if (value < 1e-7d) {
-                return 1e-7d;
-            }  else if (value > 1d - 1e-7d) {
-                return 1d-1e-7d;
-            }
-            return value;
-        }
-
-        private static Float clip(Number value) {
-            if (value.floatValue() < 1e-7f) {
-                return 1e-7f;
-            }  else if (value.floatValue() > 1f - 1e-7f) {
-                return 1f-1e-7f;
-            }
-            return value.floatValue();
         }
 
         /**
