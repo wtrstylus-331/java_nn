@@ -124,6 +124,15 @@ public class NeuralNetwork {
         return this.desiredOutput;
     }
 
+    /**
+     * for debug purposes
+     */
+    public void printLayers() {
+        for (int i = 0; i < this.layers.length; i++) {
+            System.out.println(this.layers[i].toString());
+        }
+    }
+
     public void erase() {
         this.layers = null;
         this.output = null;
@@ -239,7 +248,6 @@ public class NeuralNetwork {
                     layer.weightGrads.set(j, k, delta * previous.get(k) == -0.0f ? 0f : delta * previous.get(k));
                 }
             }
-            System.out.println(layer);
         }
     }
     
@@ -260,9 +268,6 @@ public class NeuralNetwork {
                 float biasGrad = this.layers[i].biasGrads.get(j);
                 this.layers[i].biases.set(j, currBias - (this.learningRate * biasGrad));
             }
-
-            System.out.println("\nUPDATED LAYER AFTER GRADS:");
-            System.out.println(this.layers[i].toString());
         }
     }
 
