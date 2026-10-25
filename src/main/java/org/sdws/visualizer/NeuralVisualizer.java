@@ -18,8 +18,6 @@ import javafx.stage.Stage;
 import org.sdws.nn.NetworkLayer;
 import org.sdws.nn.NeuralNetwork;
 
-import java.util.ArrayList;
-
 public class NeuralVisualizer extends Application {
     protected static NeuralNetwork neuralNetwork = null;
     private static VBox[] layerBoxes;
@@ -42,9 +40,9 @@ public class NeuralVisualizer extends Application {
         initBounds();
 
         double netDiagramHeight = HEIGHT - (HEIGHT * 0.3);
-        layerBoxes = new VBox[neuralNetwork.getLayers().size()];
+        layerBoxes = new VBox[neuralNetwork.getLayers().length];
 
-        ArrayList<NetworkLayer> layers = neuralNetwork.getLayers();
+        NetworkLayer[] layers = neuralNetwork.getLayers();
         for (NetworkLayer layer : layers) {
             System.out.println(layer.getNeurons());
         }
@@ -90,18 +88,18 @@ public class NeuralVisualizer extends Application {
         layerBox.getChildren().add(inputLayer);
 
 
-        for (int i = 0; i < layers.size(); i++) {
+        for (int i = 0; i < layers.length; i++) {
             VBox neuronBox = new VBox();
             neuronBox.setAlignment(Pos.CENTER);
             neuronBox.setSpacing(30);
 
-            for (int j = 0; j < layers.get(i).getNeurons(); j++) {
+            for (int j = 0; j < layers[i].getNeurons(); j++) {
                 Circle circle = new Circle();
                 circle.setFill(Color.GREEN);
                 circle.setRadius(20);
                 neuronBox.getChildren().add(circle);
             }
-            System.out.println(layers.get(i));
+            System.out.println(layers[i].toString());
             layerBox.getChildren().add(neuronBox);
         }
 
