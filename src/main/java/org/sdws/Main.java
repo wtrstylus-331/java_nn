@@ -32,11 +32,17 @@ public class Main {
                 new float[]{0f, 0f, 0f, 1f}
         );
 
+        long start = System.currentTimeMillis();
+
         network.input(testInput);
         network.forwardPass();
         network.calculateLoss(testOutput);
         System.out.println("loss: " + network.loss() + " output: " + network.output);
+        network.backwardPass(testOutput);
 
-        NeuralVisualizer.run(network);
+        long end = System.currentTimeMillis();
+        System.out.println("time: " + (end - start) + " ms");
+
+        //NeuralVisualizer.run(network);
     }
 }
