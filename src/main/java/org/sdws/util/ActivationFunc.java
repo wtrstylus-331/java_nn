@@ -15,18 +15,12 @@ public enum ActivationFunc {
     Sigmoid,
 
     /**
-     * Use the step function, mapping inputs to either {@code 0} or
-     * {@code 1} based on sign.
+     * Normalize output elements into 'probabilities' via Gaussian distribution.
      */
-    Step,
+    Softmax,
 
     /**
      * No activation function.
      */
     None,
-
-    /**
-     * Normalize output elements into 'probabilities' via Gaussian distribution.
-     */
-    Softmax
 }
