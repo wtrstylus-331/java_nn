@@ -20,7 +20,7 @@ public class NeuralNetwork {
 
     public NeuralNetwork(NetworkLayer... layers) {
         this.layers = new NetworkLayer[layers.length];
-        this.learningRate = 0.001f;
+        this.learningRate = 0.0001f;
         this.loss = Float.NaN;
         this.lossAlgorithm = LossAlgorithm.CCELoss;
         this.output = null;
@@ -128,7 +128,7 @@ public class NeuralNetwork {
         this.layers = null;
         this.output = null;
         this.loss = Float.NaN;
-        this.learningRate = 0.001f;
+        this.learningRate = 0.0001f;
         this.lossAlgorithm = null;
     }
 
@@ -175,10 +175,15 @@ public class NeuralNetwork {
             case CCELoss: {
                 if (this.layers[this.layers.length - 1].activation == ActivationFunc.Softmax) {
                     this.backpropCCESoftmax(desiredOutput);
+                    break;
                 }
             }
             case MSELoss: {
-
+                if (this.layers[this.layers.length - 1].activation == ActivationFunc.Softmax) {
+                    break;
+                } else {
+                    break;
+                }
             }
         }
     }
@@ -186,28 +191,54 @@ public class NeuralNetwork {
     private void backpropCCESoftmax(NArray desiredOutput) {
         for (int i = this.layers.length - 1; i >= 0; i--) {
             NetworkLayer layer = layers[i];
+            float[][] weights = layer.weights.getMatrixArray();
+            int neurons = layer.getNeurons();
 
-            if (i == this.layers.length - 1) {
-                for (int j = 0; j < layer.getNeurons(); j++) {
-                    float val = (layer.postActivationOutput.get(j) - desiredOutput.get(j));
-                    val = val == -0.0f ? 0.0f : val;
+            NArray previous = (i == 0) ? this.input : layer.prevLayer.postActivationOutput;
+
+            if (i == this.layers.length - 1) {  // output layer
+                for (int j = 0; j < neurons; j++) {
+                    float val = layer.postActivationOutput.get(j) - desiredOutput.get(j);
+                    if (val == -0.0f) {
+                        val = 0.0f;
+                    }
                     layer.neuronDeltas.set(j, val);
                 }
-//            } else if (i == 0) {
-//                break;
-            } else {
-                for (int j = 0; j < layer.getNeurons(); j++) {
-                    float summation = 0f;
-                    for (int k = 0; k < layer.nextLayer.neurons; k++) {
-                        summation += layer.nextLayer.neuronDeltas.get(k) * layer.nextLayer.weights.get(k, j);
+            } else {    // all other layers
+                NetworkLayer next = layer.nextLayer;
+                float[][] nextWeights = next.weights.getMatrixArray();
+                int nextNeurons = next.neurons;
+
+                for (int j = 0; j < neurons; j++) {
+                    float sum = 0f;
+                    for (int k = 0; k < nextNeurons; k++) {
+                        sum += next.neuronDeltas.get(k) * nextWeights[k][j];
                     }
 
-                    float val = summation * Activation.derivativeReLU(layer.postActivationOutput.get(j));
-                    val = val == -0.0f ? 0.0f : val;
+                    float val = 0f;
+                    switch (layer.activation) {
+                        case ReLU -> val = sum * Activation.derivativeReLU(layer.postActivationOutput.get(j));
+                        case Sigmoid -> val = sum * Activation.derivativeSigmoid(layer.postActivationOutput.get(j));
+                    }
+
+                    if (val == -0.0f) {
+                        val = 0.0f;
+                    }
                     layer.neuronDeltas.set(j, val);
                 }
             }
-            System.out.println(layer.neuronDeltas);
+
+            // assign gradients of weights/biases
+            for (int j = 0; j < neurons; j++) {
+                float delta = layer.neuronDeltas.get(j);
+
+                layer.biasGrads.set(j, delta);
+
+                for (int k = 0; k < weights[j].length; k++) {
+                    layer.weightGrads.set(j, k, delta * previous.get(k) == -0.0f ? 0f : delta * previous.get(k));
+                }
+            }
+            System.out.println(layer);
         }
     }
 
