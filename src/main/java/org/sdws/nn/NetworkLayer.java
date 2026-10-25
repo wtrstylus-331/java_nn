@@ -3,21 +3,20 @@ package org.sdws.nn;
 import org.sdws.util.ActivationFunc;
 import org.sdws.mathematics.Activation;
 import org.sdws.mathematics.NArray;
-import org.sdws.mathematics.NNArray;
-
-import java.util.Arrays;
 
 public class NetworkLayer {
-    public NArray weights;
-    public NArray biases;
+    protected NArray weights;
+    protected NArray biases;
     protected ActivationFunc activation;
     protected int numInputs, numOutputs;
-    public NArray preActivationOutput;
-    public NArray postActivationOutput;
+    protected NArray preActivationOutput;
+    protected NArray postActivationOutput;
 
-    public NetworkLayer prevLayer, nextLayer;
+    protected NetworkLayer prevLayer, nextLayer;
 
-    private int neurons;
+    protected NArray neuronDeltas;
+
+    protected int neurons;
 
     /**
      * Defines a single layer of neurons, initialized with a random set of weights
@@ -39,6 +38,7 @@ public class NetworkLayer {
         this.numOutputs = neurons;
         this.prevLayer = null;
         this.nextLayer = null;
+        this.neuronDeltas = NArray.CreateZeros(neurons);
 
         this.neurons = neurons;
     }
@@ -64,6 +64,7 @@ public class NetworkLayer {
         this.numOutputs = neurons;
         this.prevLayer = null;
         this.nextLayer = null;
+        this.neuronDeltas = NArray.CreateZeros(neurons);
 
         this.neurons = neurons;
     }
@@ -72,14 +73,22 @@ public class NetworkLayer {
         return this.neurons;
     }
 
+    public NetworkLayer getPrevLayer() {
+        return this.prevLayer;
+    }
+
+    public NetworkLayer getNextLayer() {
+        return this.nextLayer;
+    }
+
     /**
      * Calculate the output(s) of this layer via matrix/vector computation
      * between neuron weights and biases, finally applying the output into
      * the specified activation function initialized for this layer.
-     * @param input a {@link NNArray} representing either a matrix or vector,
+     * @param input a {@link NArray} representing either a matrix or vector,
      *              or simple a {@code Float} in which case its shape and dimension is {@code 1}
      */
-    public void ForwardPass(NArray input) {
+    protected void forwardPass(NArray input) {
         this.calculateOutput(input);
         System.out.println("\nOUTPUT (pre): " + this.preActivationOutput+"\n");
         this.postActivationOutput = NArray.DeepCopy(this.preActivationOutput);
@@ -92,7 +101,6 @@ public class NetworkLayer {
         switch (this.activation) {
             case ReLU -> Activation.ReLU(this.postActivationOutput);
             case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
-            case Step -> Activation.Step(this.postActivationOutput);
             case Softmax -> Activation.Softmax(this.postActivationOutput);
         }
 
