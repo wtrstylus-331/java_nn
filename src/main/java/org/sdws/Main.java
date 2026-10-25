@@ -38,6 +38,8 @@ public class Main {
         network.forwardPass();
         network.calculateLoss(testOutput);
         System.out.println("loss: " + network.loss() + " output: " + network.output);
+        System.out.println("\nEND OF FORWARD PASS\n==============================================\n");
+        System.out.println("\nSTART OF BACKWARD PASS\n==============================================\n");
         network.backwardPass(testOutput);
 
         long end = System.currentTimeMillis();
