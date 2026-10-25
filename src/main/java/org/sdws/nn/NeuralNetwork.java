@@ -175,6 +175,7 @@ public class NeuralNetwork {
             case CCELoss: {
                 if (this.layers[this.layers.length - 1].activation == ActivationFunc.Softmax) {
                     this.backpropCCESoftmax(desiredOutput);
+                    this.updateParams();
                     break;
                 }
             }
@@ -239,6 +240,29 @@ public class NeuralNetwork {
                 }
             }
             System.out.println(layer);
+        }
+    }
+    
+    private void updateParams() {
+        for (int i = 0; i < this.layers.length; i++) {
+            int neurons = this.layers[i].neurons;
+
+            for (int j = 0; j < neurons; j++) {
+                int weightsLen = this.layers[i].weights.getMatrixArray()[j].length;
+
+                for (int k = 0; k < weightsLen; k++) {
+                    float currWeight = this.layers[i].weights.get(j, k);
+                    float weightGrad = this.layers[i].weightGrads.get(j, k);
+                    this.layers[i].weights.set(j, k, currWeight - (this.learningRate * weightGrad));
+                }
+
+                float currBias = this.layers[i].biases.get(j);
+                float biasGrad = this.layers[i].biasGrads.get(j);
+                this.layers[i].biases.set(j, currBias - (this.learningRate * biasGrad));
+            }
+
+            System.out.println("\nUPDATED LAYER AFTER GRADS:");
+            System.out.println(this.layers[i].toString());
         }
     }
 
