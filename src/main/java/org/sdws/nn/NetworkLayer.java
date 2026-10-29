@@ -68,7 +68,7 @@ public class NetworkLayer {
         this.prevLayer = null;
         this.nextLayer = null;
 
-        this.neuronDeltas = NArray.CreateZeros(neurons);
+        this.neuronDeltas = null;
         this.weightGrads = NArray.CreateZeros(neurons, inputs);
         this.biasGrads = NArray.CreateZeros(neurons);
 
