@@ -127,6 +127,8 @@ public class NetworkLayer {
                 this.biasGrads + "\n" +
                 "Neuron deltas:\n" +
                 this.neuronDeltas + "\n" +
+                "Output:\n" +
+                this.postActivationOutput + "\n" +
                 "==========================";
     }
 }
