@@ -109,6 +109,28 @@ public class NetworkLayer {
         }
     }
 
+    protected void forwardPassBatch(NArray input) {
+        float[][] array = input.getMatrixArray();
+        float[][] preActArray = new float[array.length][this.neurons];
+        for (int i = 0; i < array.length; i++) {
+            NArray row = NArray.FromElements(array[i]);
+            preActArray[i] = NArray.Add(NArray.Mul(this.weights, row), this.biases).getVecArray();
+        }
+        this.preActivationOutput = NArray.FromNested(preActArray);
+
+        this.postActivationOutput = NArray.DeepCopy(this.preActivationOutput);
+
+        if (this.activation.equals(ActivationFunc.None)) {
+            return;
+        }
+
+        switch (this.activation) {
+            case ReLU -> Activation.ReLU(this.postActivationOutput);
+            case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
+            case Softmax -> Activation.Softmax(this.postActivationOutput);
+        }
+    }
+
     private void calculateOutput(NArray input) {
         this.preActivationOutput = NArray.Mul(this.weights, input);
         this.preActivationOutput = NArray.Add(this.preActivationOutput, this.biases);
