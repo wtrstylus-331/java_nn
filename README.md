@@ -1,4 +1,4 @@
-~ An attempt at making a Java library for creating, evaluating, and utilizing Neural Networks, with total flexibility in mind. This project originally started with a desire to learn and implement Neural Networks for areas such as Reinforcement Learning (which will hopefully be implemented via Java GUI environments/games). The reason I started with Java, rather than Python, was to get a sense of how a complex system such as an ANN would work in an Object-Oriented, statically typed language, which would also make it easier to implement the same idea in other languages like C#.
+~ An attempt at making a Java library for creating, evaluating, and utilizing Neural Networks, with total flexibility in mind. This project originally started with a desire to learn and implement Neural Networks for areas such as Reinforcement Learning (which will hopefully be implemented via Java GUI environments/games). The reason I started with Java, rather than Python, was to get a sense of how a complex system such as an ANN would work in an Object-Oriented, statically typed language, which would also make it simple to implement the same idea in other languages like C#.
 
 # Overview
 ### Implemented
@@ -6,11 +6,11 @@
 - Various activation functions and algorithms (Step, Sigmoid, ReLU, Softmax), along with feed forward algorithm for the _**NeuralNetwork**_ class
 - Various methods of calculating loss divided into cases for single vector input/output and batches of multiple vectors (as matrices); loss algorithms being Mean Squared Error, Root MSE, Cross-Categorical Entropy, Binary Categorical Entropy
 - GUI class solely meant to display Neural Networks
+- Backpropagation algorithms for CCE + Softmax and MSE (not handling Softmax) to handle both single vector inputs (stochastic gradient descent) and batches of vector inputs as matrices (batch gradient descent)
 
 ### TODO
-- Implement gradient descent algorithms for various loss functions for the backpropagation process
+- Implement gradient descent algorithms for remaining loss functions for the backpropagation process
 - Optimizers for gradient descent
-- Loops for training NN's upon implementation of the previous bullet points
 - Implement MVC design principles to structure the core GUI application with features such as manual forward/backward passing and value inspection for individual neurons
 - As usual, proper documentation for methods/functions
 
