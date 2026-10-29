@@ -156,20 +156,30 @@ public class NeuralNetwork {
                 break;
             }
             case 2: {   // batch of vectors (matrix) as input
-                float[][] batch = this.input.getMatrixArray();
-                float[][] batchOutput = new float[batch.length][this.layers[this.layers.length - 1].getNeurons()];
+//                float[][] batch = this.input.getMatrixArray();
+//                float[][] batchOutput = new float[batch.length][this.layers[this.layers.length - 1].getNeurons()];
+//
+//                for (int i = 0; i < batch.length; i++) {
+//                    NArray prevOutput = NArray.FromRows(batch[i]);
+//                    for (NetworkLayer layer : this.layers) {
+//                        layer.forwardPass(prevOutput);
+//                        prevOutput = layer.postActivationOutput;
+//                    }
+//
+//                    batchOutput[i] = prevOutput.getVecArray();
+//                }
+//
+//                this.output = NArray.FromNested(batchOutput);
+//                break;
 
-                for (int i = 0; i < batch.length; i++) {
-                    NArray prevOutput = NArray.FromRows(batch[i]);
-                    for (NetworkLayer layer : this.layers) {
-                        layer.forwardPass(prevOutput);
-                        prevOutput = layer.postActivationOutput;
-                    }
+                NArray prevOutput = this.input;
 
-                    batchOutput[i] = prevOutput.getVecArray();
+                for (NetworkLayer layer : this.layers) {
+                    layer.forwardPassBatch(prevOutput);
+                    prevOutput = layer.postActivationOutput;
                 }
 
-                this.output = NArray.FromNested(batchOutput);
+                this.output = prevOutput;
                 break;
             }
         }
@@ -185,68 +195,270 @@ public class NeuralNetwork {
                 if (this.layers[this.layers.length - 1].activation == ActivationFunc.Softmax) {
                     this.backpropCCESoftmax(desiredOutput);
                     this.updateParams();
-                    break;
                 }
+                break;
             }
             case MSELoss: {
-                if (this.layers[this.layers.length - 1].activation == ActivationFunc.Softmax) {
-                    break;
+                if (this.layers[this.layers.length - 1].activation != ActivationFunc.Softmax) {
+                    this.backpropMSE(desiredOutput);
+                    this.updateParams();
                 } else {
-                    break;
+                    throw new UnsupportedOperationException("The configuration of the loss algorithm and neural network provided for backpropagation has not been implemented.");
+                }
+                break;
+            }
+            default: {
+                throw new UnsupportedOperationException("The configuration of the loss algorithm and neural network provided for backpropagation has not been implemented.");
+            }
+        }
+    }
+
+    private void backpropMSE(NArray desiredOutput) {
+        if (desiredOutput.dimension == 2) {
+            this.MSEBatchBackprop(desiredOutput);
+        } else {
+            this.MSESingleVectorBackprop(desiredOutput);
+        }
+    }
+
+    private void MSEBatchBackprop(NArray desiredOutput) {
+        int batchSize = desiredOutput.shape[0];
+
+        for (int b = 0; b < batchSize; b++) {
+            for (int i = this.layers.length - 1; i >= 0; i--) {
+                NetworkLayer current = layers[i];
+                int neurons = current.getNeurons();
+
+                if (current.neuronDeltas == null) {
+                    current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
+                }
+
+                if (i == this.layers.length - 1) {  // output layer
+                    for (int j = 0; j < neurons; j++) {
+                        float val = 2 * (current.postActivationOutput.get(j) - desiredOutput.get(j));
+                        if (val == -0.0f) {
+                            val = 0.0f;
+                        }
+                        current.neuronDeltas.set(b, j, val);
+                    }
+                } else {    // all other layers
+                    NetworkLayer next = current.nextLayer;
+                    float[][] nextWeights = next.weights.getMatrixArray();
+                    int nextNeurons = next.neurons;
+
+                    for (int j = 0; j < neurons; j++) {
+                        float sum = 0f;
+                        for (int k = 0; k < nextNeurons; k++) {
+                            sum += next.neuronDeltas.get(b, k) * nextWeights[k][j];
+                        }
+
+                        float val = 0f;
+                        switch (current.activation) {
+                            case ReLU -> val = sum * Activation.derivativeReLU(current.postActivationOutput.get(b, j));
+                            case Sigmoid -> val = sum * Activation.derivativeSigmoid(current.postActivationOutput.get(b, j));
+                        }
+
+                        if (val == -0.0f) {
+                            val = 0.0f;
+                        }
+                        current.neuronDeltas.set(b, j, val);
+                    }
+                }
+            }
+        }
+
+        for (int i = this.layers.length - 1; i >= 0; i--) {
+            NetworkLayer current = layers[i];
+            float[][] weights = current.weights.getMatrixArray();
+            int neurons = current.getNeurons();
+
+            for (int j = 0; j < neurons; j++) {
+                float addedDelta = 0f;
+                for (int b = 0; b < batchSize; b++) {
+                    addedDelta += current.neuronDeltas.get(b, j);
+                }
+
+                float biasGrad = addedDelta / batchSize;
+                current.biasGrads.set(j, biasGrad == -0.0f ? 0f : biasGrad);
+
+                for (int b = 0; b < batchSize; b++) {
+                    for (int k = 0; k < weights[j].length; k++) {
+                        float weightGrad = addedDelta * (i == 0 ? this.input.get(b,k) : current.prevLayer.postActivationOutput.get(b, k));
+                        current.weightGrads.set(j, k, weightGrad == -0.0f ? 0f : weightGrad);
+                    }
                 }
             }
         }
     }
 
-    private void backpropCCESoftmax(NArray desiredOutput) {
+    private void MSESingleVectorBackprop(NArray desiredOutput) {
         for (int i = this.layers.length - 1; i >= 0; i--) {
-            NetworkLayer layer = layers[i];
-            float[][] weights = layer.weights.getMatrixArray();
-            int neurons = layer.getNeurons();
+            NetworkLayer current = layers[i];
+            float[][] weights = current.weights.getMatrixArray();
+            int neurons = current.getNeurons();
 
-            NArray previous = (i == 0) ? this.input : layer.prevLayer.postActivationOutput;
+            if (current.neuronDeltas == null) {
+                current.neuronDeltas = NArray.CreateZeros(neurons);
+            }
+
+            NArray previous = (i == 0) ? this.input : current.prevLayer.postActivationOutput;
 
             if (i == this.layers.length - 1) {  // output layer
                 for (int j = 0; j < neurons; j++) {
-                    float val = layer.postActivationOutput.get(j) - desiredOutput.get(j);
+                    float val = 2 * (current.postActivationOutput.get(j) - desiredOutput.get(j));
                     if (val == -0.0f) {
                         val = 0.0f;
                     }
-                    layer.neuronDeltas.set(j, val);
+                    current.neuronDeltas.set(j, val);
                 }
             } else {    // all other layers
-                NetworkLayer next = layer.nextLayer;
-                float[][] nextWeights = next.weights.getMatrixArray();
-                int nextNeurons = next.neurons;
-
-                for (int j = 0; j < neurons; j++) {
-                    float sum = 0f;
-                    for (int k = 0; k < nextNeurons; k++) {
-                        sum += next.neuronDeltas.get(k) * nextWeights[k][j];
-                    }
-
-                    float val = 0f;
-                    switch (layer.activation) {
-                        case ReLU -> val = sum * Activation.derivativeReLU(layer.postActivationOutput.get(j));
-                        case Sigmoid -> val = sum * Activation.derivativeSigmoid(layer.postActivationOutput.get(j));
-                    }
-
-                    if (val == -0.0f) {
-                        val = 0.0f;
-                    }
-                    layer.neuronDeltas.set(j, val);
-                }
+                this.calculateLayerDeltas(current, neurons);
             }
 
             // assign gradients of weights/biases
-            for (int j = 0; j < neurons; j++) {
-                float delta = layer.neuronDeltas.get(j);
+            this.assignGrads(current, neurons, weights, previous);
+        }
+    }
 
-                layer.biasGrads.set(j, delta);
+    private void backpropCCESoftmax(NArray desiredOutput) {
+        if (desiredOutput.dimension == 2) {
+            this.CCESoftmaxBatchBackprop(desiredOutput);
+        } else {
+            this.CCESoftmaxSingleVectorBackprop(desiredOutput);
+        }
+    }
 
-                for (int k = 0; k < weights[j].length; k++) {
-                    layer.weightGrads.set(j, k, delta * previous.get(k) == -0.0f ? 0f : delta * previous.get(k));
+    private void CCESoftmaxBatchBackprop(NArray desiredOutput) {
+        int batchSize = desiredOutput.shape[0];
+
+        for (int b = 0; b < batchSize; b++) {
+            for (int i = this.layers.length - 1; i >= 0; i--) {
+                NetworkLayer current = layers[i];
+                int neurons = current.getNeurons();
+
+                if (current.neuronDeltas == null) {
+                    current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
                 }
+
+                if (i == this.layers.length - 1) {  // output layer
+                    for (int j = 0; j < neurons; j++) {
+                        float val = current.postActivationOutput.get(b, j) - desiredOutput.get(b, j);
+                        if (val == -0.0f) {
+                            val = 0.0f;
+                        }
+                        current.neuronDeltas.set(b, j, val);
+                    }
+                } else {    // all other layers
+                    NetworkLayer next = current.nextLayer;
+                    float[][] nextWeights = next.weights.getMatrixArray();
+                    int nextNeurons = next.neurons;
+
+                    for (int j = 0; j < neurons; j++) {
+                        float sum = 0f;
+                        for (int k = 0; k < nextNeurons; k++) {
+                            sum += next.neuronDeltas.get(b, k) * nextWeights[k][j];
+                        }
+
+                        float val = 0f;
+                        switch (current.activation) {
+                            case ReLU -> val = sum * Activation.derivativeReLU(current.postActivationOutput.get(b, j));
+                            case Sigmoid -> val = sum * Activation.derivativeSigmoid(current.postActivationOutput.get(b, j));
+                        }
+
+                        if (val == -0.0f) {
+                            val = 0.0f;
+                        }
+                        current.neuronDeltas.set(b, j, val);
+                    }
+                }
+            }
+        }
+
+        for (int i = this.layers.length - 1; i >= 0; i--) {
+            NetworkLayer current = layers[i];
+            float[][] weights = current.weights.getMatrixArray();
+            int neurons = current.getNeurons();
+
+            for (int j = 0; j < neurons; j++) {
+                float addedDelta = 0f;
+                for (int b = 0; b < batchSize; b++) {
+                    addedDelta += current.neuronDeltas.get(b, j);
+                }
+
+                float biasGrad = addedDelta / batchSize;
+                current.biasGrads.set(j, biasGrad == -0.0f ? 0f : biasGrad);
+
+                for (int b = 0; b < batchSize; b++) {
+                    for (int k = 0; k < weights[j].length; k++) {
+                        float weightGrad = addedDelta * (i == 0 ? this.input.get(b,k) : current.prevLayer.postActivationOutput.get(b, k));
+                        current.weightGrads.set(j, k, weightGrad == -0.0f ? 0f : weightGrad);
+                    }
+                }
+            }
+        }
+    }
+
+    private void CCESoftmaxSingleVectorBackprop(NArray desiredOutput) {
+        for (int i = this.layers.length - 1; i >= 0; i--) {
+            NetworkLayer current = layers[i];
+            float[][] weights = current.weights.getMatrixArray();
+            int neurons = current.getNeurons();
+
+            if (current.neuronDeltas == null) {
+                current.neuronDeltas = NArray.CreateZeros(neurons);
+            }
+
+            NArray previous = (i == 0) ? this.input : current.prevLayer.postActivationOutput;
+
+            if (i == this.layers.length - 1) {  // output layer
+                for (int j = 0; j < neurons; j++) {
+                    float val = current.postActivationOutput.get(j) - desiredOutput.get(j);
+                    if (val == -0.0f) {
+                        val = 0.0f;
+                    }
+                    current.neuronDeltas.set(j, val);
+                }
+            } else {    // all other layers
+                this.calculateLayerDeltas(current, neurons);
+            }
+
+            // assign gradients of weights/biases
+            this.assignGrads(current, neurons, weights, previous);
+        }
+    }
+
+    private void calculateLayerDeltas(NetworkLayer currentLayer, int currentNeurons) {
+        NetworkLayer next = currentLayer.nextLayer;
+        float[][] nextWeights = next.weights.getMatrixArray();
+        int nextNeurons = next.neurons;
+
+        for (int j = 0; j < currentNeurons; j++) {
+            float sum = 0f;
+            for (int k = 0; k < nextNeurons; k++) {
+                sum += next.neuronDeltas.get(k) * nextWeights[k][j];
+            }
+
+            float val = 0f;
+            switch (currentLayer.activation) {
+                case ReLU -> val = sum * Activation.derivativeReLU(currentLayer.postActivationOutput.get(j));
+                case Sigmoid -> val = sum * Activation.derivativeSigmoid(currentLayer.postActivationOutput.get(j));
+            }
+
+            if (val == -0.0f) {
+                val = 0.0f;
+            }
+            currentLayer.neuronDeltas.set(j, val);
+        }
+    }
+
+    private void assignGrads(NetworkLayer layer, int neurons, float[][] weights, NArray previous) {
+        for (int j = 0; j < neurons; j++) {
+            float delta = layer.neuronDeltas.get(j);
+
+            layer.biasGrads.set(j, delta);
+
+            for (int k = 0; k < weights[j].length; k++) {
+                layer.weightGrads.set(j, k, delta * previous.get(k) == -0.0f ? 0f : delta * previous.get(k));
             }
         }
     }
@@ -261,11 +473,13 @@ public class NeuralNetwork {
                 for (int k = 0; k < weightsLen; k++) {
                     float currWeight = this.layers[i].weights.get(j, k);
                     float weightGrad = this.layers[i].weightGrads.get(j, k);
+                    // grad descent
                     this.layers[i].weights.set(j, k, currWeight - (this.learningRate * weightGrad));
                 }
 
                 float currBias = this.layers[i].biases.get(j);
                 float biasGrad = this.layers[i].biasGrads.get(j);
+                // grad descent
                 this.layers[i].biases.set(j, currBias - (this.learningRate * biasGrad));
             }
         }
@@ -409,7 +623,7 @@ public class NeuralNetwork {
             for (int i = 0; i < n; i++) {
                 int index = -1;
                 for (int j = 0; j < array[i].length; j++) {
-                    if (desiredOutput.get(j) == 1f) {
+                    if (desiredOutput.get(i, j) == 1f) {
                         index = j;
                         break;
                     }
@@ -558,7 +772,7 @@ public class NeuralNetwork {
                 throw new IllegalArgumentException("Desired output vector must not be empty for MSE loss. (single output)");
             }
 
-            if (!Objects.equals(((NArray)this.output).shape, desiredOutput.shape)) {
+            if (!(Objects.equals(((NArray)this.output).shape[0], desiredOutput.shape[0]) && Objects.equals(((NArray)this.output).shape[1], desiredOutput.shape[1]))) {
                 throw new IllegalArgumentException("Desired output vector must match the length of neural network output for MSE loss. (single output)");
             }
         } else {
