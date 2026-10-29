@@ -4,6 +4,8 @@ import org.sdws.util.ActivationFunc;
 import org.sdws.mathematics.Activation;
 import org.sdws.mathematics.NArray;
 
+import java.util.Arrays;
+
 public class NetworkLayer {
     protected NArray weights;
     protected NArray biases;
