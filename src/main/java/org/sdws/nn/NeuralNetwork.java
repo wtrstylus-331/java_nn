@@ -112,6 +112,14 @@ public class NeuralNetwork {
         this.input = input;
     }
 
+    public void input(float[] vector) {
+        this.input = NArray.FromElements(vector);
+    }
+
+    public void input(float[][] batch) {
+        this.input = NArray.FromNested(batch);
+    }
+
     public NArray getInput() {
         return this.input;
     }
@@ -144,44 +152,24 @@ public class NeuralNetwork {
     public void forwardPass() {
         if (this.input == null) return;
 
-        switch (this.input.dimension) {
-            default: {  // single vector input
-                NArray prevOutput = this.input;
-                for (NetworkLayer layer : this.layers) {
-                    layer.forwardPass(prevOutput);
-                    prevOutput = layer.postActivationOutput;
-                }
+        if (this.input.dimension == 2) {    // batch of vectors (matrix) as input
+            NArray prevOutput = this.input;
 
-                this.output = prevOutput;
-                break;
+            for (NetworkLayer layer : this.layers) {
+                layer.forwardPassBatch(prevOutput);
+                prevOutput = layer.postActivationOutput;
             }
-            case 2: {   // batch of vectors (matrix) as input
-//                float[][] batch = this.input.getMatrixArray();
-//                float[][] batchOutput = new float[batch.length][this.layers[this.layers.length - 1].getNeurons()];
-//
-//                for (int i = 0; i < batch.length; i++) {
-//                    NArray prevOutput = NArray.FromRows(batch[i]);
-//                    for (NetworkLayer layer : this.layers) {
-//                        layer.forwardPass(prevOutput);
-//                        prevOutput = layer.postActivationOutput;
-//                    }
-//
-//                    batchOutput[i] = prevOutput.getVecArray();
-//                }
-//
-//                this.output = NArray.FromNested(batchOutput);
-//                break;
 
-                NArray prevOutput = this.input;
+            this.output = prevOutput;
+        } else {    // single vector input
+            NArray prevOutput = this.input;
 
-                for (NetworkLayer layer : this.layers) {
-                    layer.forwardPassBatch(prevOutput);
-                    prevOutput = layer.postActivationOutput;
-                }
-
-                this.output = prevOutput;
-                break;
+            for (NetworkLayer layer : this.layers) {
+                layer.forwardPass(prevOutput);
+                prevOutput = layer.postActivationOutput;
             }
+
+            this.output = prevOutput;
         }
     }
 
@@ -229,9 +217,7 @@ public class NeuralNetwork {
                 NetworkLayer current = layers[i];
                 int neurons = current.getNeurons();
 
-                if (current.neuronDeltas == null) {
-                    current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
-                }
+                current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
 
                 if (i == this.layers.length - 1) {  // output layer
                     for (int j = 0; j < neurons; j++) {
@@ -273,19 +259,24 @@ public class NeuralNetwork {
             int neurons = current.getNeurons();
 
             for (int j = 0; j < neurons; j++) {
-                float addedDelta = 0f;
+                float biasGrad = 0f;
                 for (int b = 0; b < batchSize; b++) {
-                    addedDelta += current.neuronDeltas.get(b, j);
+                    biasGrad += current.neuronDeltas.get(b, j);
                 }
 
-                float biasGrad = addedDelta / batchSize;
+                biasGrad = biasGrad / batchSize;
                 current.biasGrads.set(j, biasGrad == -0.0f ? 0f : biasGrad);
 
-                for (int b = 0; b < batchSize; b++) {
-                    for (int k = 0; k < weights[j].length; k++) {
-                        float weightGrad = addedDelta * (i == 0 ? this.input.get(b,k) : current.prevLayer.postActivationOutput.get(b, k));
-                        current.weightGrads.set(j, k, weightGrad == -0.0f ? 0f : weightGrad);
+                for (int k = 0; k < weights[j].length; k++) {
+                    float weightGrad = 0f;
+                    for (int b = 0; b < batchSize; b++) {
+                        float delta = current.neuronDeltas.get(b, j);
+                        float prevValue = (i == 0 ? this.input.get(b,k) : current.prevLayer.postActivationOutput.get(b, k));
+                        weightGrad += delta * prevValue;
                     }
+
+                    weightGrad = weightGrad / batchSize;
+                    current.weightGrads.set(j, k, weightGrad == -0.0f ? 0f : weightGrad);
                 }
             }
         }
@@ -297,9 +288,7 @@ public class NeuralNetwork {
             float[][] weights = current.weights.getMatrixArray();
             int neurons = current.getNeurons();
 
-            if (current.neuronDeltas == null) {
-                current.neuronDeltas = NArray.CreateZeros(neurons);
-            }
+            current.neuronDeltas = NArray.CreateZeros(neurons);
 
             NArray previous = (i == 0) ? this.input : current.prevLayer.postActivationOutput;
 
@@ -331,15 +320,13 @@ public class NeuralNetwork {
     private void CCESoftmaxBatchBackprop(NArray desiredOutput) {
         int batchSize = desiredOutput.shape[0];
 
-        for (int b = 0; b < batchSize; b++) {
-            for (int i = this.layers.length - 1; i >= 0; i--) {
-                NetworkLayer current = layers[i];
-                int neurons = current.getNeurons();
+        for (int i = this.layers.length - 1; i >= 0; i--) {
+            NetworkLayer current = layers[i];
+            int neurons = current.getNeurons();
 
-                if (current.neuronDeltas == null) {
-                    current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
-                }
+            current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
 
+            for (int b = 0; b < batchSize; b++) {
                 if (i == this.layers.length - 1) {  // output layer
                     for (int j = 0; j < neurons; j++) {
                         float val = current.postActivationOutput.get(b, j) - desiredOutput.get(b, j);
@@ -380,19 +367,24 @@ public class NeuralNetwork {
             int neurons = current.getNeurons();
 
             for (int j = 0; j < neurons; j++) {
-                float addedDelta = 0f;
+                float biasGrad = 0f;
                 for (int b = 0; b < batchSize; b++) {
-                    addedDelta += current.neuronDeltas.get(b, j);
+                    biasGrad += current.neuronDeltas.get(b, j);
                 }
 
-                float biasGrad = addedDelta / batchSize;
+                biasGrad = biasGrad / batchSize;
                 current.biasGrads.set(j, biasGrad == -0.0f ? 0f : biasGrad);
 
-                for (int b = 0; b < batchSize; b++) {
-                    for (int k = 0; k < weights[j].length; k++) {
-                        float weightGrad = addedDelta * (i == 0 ? this.input.get(b,k) : current.prevLayer.postActivationOutput.get(b, k));
-                        current.weightGrads.set(j, k, weightGrad == -0.0f ? 0f : weightGrad);
+                for (int k = 0; k < weights[j].length; k++) {
+                    float weightGrad = 0f;
+                    for (int b = 0; b < batchSize; b++) {
+                        float delta = current.neuronDeltas.get(b, j);
+                        float prevValue = (i == 0 ? this.input.get(b,k) : current.prevLayer.postActivationOutput.get(b, k));
+                        weightGrad += delta * prevValue;
                     }
+
+                    weightGrad = weightGrad / batchSize;
+                    current.weightGrads.set(j, k, weightGrad == -0.0f ? 0f : weightGrad);
                 }
             }
         }
@@ -404,9 +396,7 @@ public class NeuralNetwork {
             float[][] weights = current.weights.getMatrixArray();
             int neurons = current.getNeurons();
 
-            if (current.neuronDeltas == null) {
-                current.neuronDeltas = NArray.CreateZeros(neurons);
-            }
+            current.neuronDeltas = NArray.CreateZeros(neurons);
 
             NArray previous = (i == 0) ? this.input : current.prevLayer.postActivationOutput;
 
@@ -633,7 +623,7 @@ public class NeuralNetwork {
                 sum += (float) Math.log(clippedValue);
             }
 
-            this.loss = ((float) -1/n) * sum;
+            this.loss = -sum / n;
         }
     }
 
