@@ -89,6 +89,14 @@ public class NetworkLayer {
         return this.nextLayer;
     }
 
+    public NArray getWeights() {
+        return this.weights;
+    }
+
+    public void setWeights(NArray weights) {
+        this.weights = weights;
+    }
+
     /**
      * Calculate the output(s) of this layer via matrix/vector computation
      * between neuron weights and biases, finally applying the output into
