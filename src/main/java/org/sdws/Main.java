@@ -59,7 +59,7 @@ public class Main {
         }
         System.out.println();
 
-        sgd(network, data, batchOutput, 30000);
+        sgd(network, data, batchOutput, 50000);
 
         System.out.println("\nnetwork after:");
         for (int i = 0; i < data.shape[0]; i++) {
