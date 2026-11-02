@@ -212,16 +212,16 @@ public class NeuralNetwork {
     private void MSEBatchBackprop(NArray desiredOutput) {
         int batchSize = desiredOutput.shape[0];
 
-        for (int b = 0; b < batchSize; b++) {
-            for (int i = this.layers.length - 1; i >= 0; i--) {
-                NetworkLayer current = layers[i];
-                int neurons = current.getNeurons();
+        for (int i = this.layers.length - 1; i >= 0; i--) {
+            NetworkLayer current = layers[i];
+            int neurons = current.getNeurons();
 
-                current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
+            current.neuronDeltas = NArray.CreateZeros(batchSize, neurons);
 
+            for (int b = 0; b < batchSize; b++) {
                 if (i == this.layers.length - 1) {  // output layer
                     for (int j = 0; j < neurons; j++) {
-                        float val = 2 * (current.postActivationOutput.get(j) - desiredOutput.get(j));
+                        float val = 2 * (current.postActivationOutput.get(b, j) - desiredOutput.get(b, j));
                         if (val == -0.0f) {
                             val = 0.0f;
                         }
