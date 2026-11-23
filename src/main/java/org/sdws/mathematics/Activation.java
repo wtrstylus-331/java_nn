@@ -1,5 +1,5 @@
 package org.sdws.mathematics;
 
-interface Activation {
-
+public interface Activation {
+    NArray compute(NArray input);
 }
