@@ -1,6 +1,5 @@
 package org.sdws.nn;
 
-import org.sdws.mathematics.Activation;
 import org.sdws.util.ActivationFunc;
 import org.sdws.util.LossAlgorithm;
 import org.sdws.mathematics.NArray;
