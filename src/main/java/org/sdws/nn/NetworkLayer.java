@@ -1,15 +1,11 @@
 package org.sdws.nn;
 
-import org.sdws.util.ActivationFunc;
-import org.sdws.mathematics.Activation;
-import org.sdws.mathematics.NArray;
-
-import java.util.Arrays;
+import org.sdws.mathematics.*;
 
 public class NetworkLayer {
     protected NArray weights;
     protected NArray biases;
-    protected ActivationFunc activation;
+    protected Activation activation;
     protected int numInputs, numOutputs;
     protected NArray preActivationOutput;
     protected NArray postActivationOutput;
@@ -22,7 +18,7 @@ public class NetworkLayer {
 
     /**
      * Defines a single layer of neurons, initialized with a random set of weights
-     * and biases. Activation function type is set to {@link ActivationFunc}{@code .ReLU} by default.<p></p>
+     * and biases. Activation function is set to {@link ReLU} by default.<p></p>
      * The initialized layer is represented as a 2-dimensional {@code NNArray}
      * with the shape [<code>neurons</code> x <code>inputs</code>].
      * @param inputs integer representing the amount of inputs for this layer
@@ -35,7 +31,7 @@ public class NetworkLayer {
 
         this.weights = NArray.InitializeHe(neurons, inputs);
         this.biases = NArray.CreateZeros(neurons);
-        this.activation = ActivationFunc.ReLU;
+        this.activation = new ReLU();
         this.numInputs = inputs;
         this.numOutputs = neurons;
         this.prevLayer = null;
@@ -55,9 +51,9 @@ public class NetworkLayer {
      * with the shape [<code>neurons</code> x <code>inputs</code>].
      * @param inputs integer representing the amount of inputs for this layer
      * @param neurons integer representing the total amount of neurons for this layer
-     * @param activation function type from the {@link ActivationFunc} enumerator
+     * @param activation function type implementing the {@link Activation} interface
      */
-    public NetworkLayer(int inputs, int neurons, ActivationFunc activation) {
+    public NetworkLayer(int inputs, int neurons, Activation activation) {
         if (neurons < 1) {
             throw new IllegalArgumentException("Neurons in a layer must be greater than or equal to one");
         }
@@ -106,17 +102,7 @@ public class NetworkLayer {
      */
     protected void forwardPass(NArray input) {
         this.calculateOutput(input);
-        this.postActivationOutput = NArray.DeepCopy(this.preActivationOutput);
-
-        if (this.activation.equals(ActivationFunc.None)) {
-            return;
-        }
-
-        switch (this.activation) {
-            case ReLU -> Activation.ReLU(this.postActivationOutput);
-            case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
-            case Softmax -> Activation.Softmax(this.postActivationOutput);
-        }
+        this.postActivationOutput = this.activation.compute(this.preActivationOutput);
     }
 
     protected void forwardPassBatch(NArray input) {
@@ -127,18 +113,7 @@ public class NetworkLayer {
             preActArray[i] = NArray.Add(NArray.Mul(this.weights, row), this.biases).getVecArray();
         }
         this.preActivationOutput = NArray.FromNested(preActArray);
-
-        this.postActivationOutput = NArray.DeepCopy(this.preActivationOutput);
-
-        if (this.activation.equals(ActivationFunc.None)) {
-            return;
-        }
-
-        switch (this.activation) {
-            case ReLU -> Activation.ReLU(this.postActivationOutput);
-            case Sigmoid -> Activation.Sigmoid(this.postActivationOutput);
-            case Softmax -> Activation.Softmax(this.postActivationOutput);
-        }
+        this.postActivationOutput = this.activation.compute(this.preActivationOutput);
     }
 
     private void calculateOutput(NArray input) {
