@@ -1,7 +1,7 @@
 package org.sdws.nn;
 
+import org.sdws.mathematics.Sigmoid;
 import org.sdws.mathematics.Softmax;
-import org.sdws.util.ActivationFunc;
 import org.sdws.util.LossAlgorithm;
 import org.sdws.mathematics.NArray;
 
@@ -239,10 +239,6 @@ public class NeuralNetwork {
                         }
 
                         float val = sum * current.activation.computeDerivative(current.postActivationOutput.get(b, j));
-//                        switch (current.activation) {
-//                            case ReLU -> val = sum * Activation.derivativeReLU(current.postActivationOutput.get(b, j));
-//                            case Sigmoid -> val = sum * Activation.derivativeSigmoid(current.postActivationOutput.get(b, j));
-//                        }
 
                         if (val == -0.0f) {
                             val = 0.0f;
@@ -347,10 +343,6 @@ public class NeuralNetwork {
                         }
 
                         float val = sum * current.activation.computeDerivative(current.postActivationOutput.get(b, j));
-//                        switch (current.activation) {
-//                            case ReLU -> val = sum * Activation.derivativeReLU(current.postActivationOutput.get(b, j));
-//                            case Sigmoid -> val = sum * Activation.derivativeSigmoid(current.postActivationOutput.get(b, j));
-//                        }
 
                         if (val == -0.0f) {
                             val = 0.0f;
@@ -429,10 +421,6 @@ public class NeuralNetwork {
             }
 
             float val = sum * currentLayer.activation.computeDerivative(currentLayer.postActivationOutput.get(j));
-//            switch (currentLayer.activation) {
-//                case ReLU -> val = sum * Activation.derivativeReLU(currentLayer.postActivationOutput.get(j));
-//                case Sigmoid -> val = sum * Activation.derivativeSigmoid(currentLayer.postActivationOutput.get(j));
-//            }
 
             if (val == -0.0f) {
                 val = 0.0f;
@@ -644,9 +632,9 @@ public class NeuralNetwork {
             throw new IllegalArgumentException("Desired output for BCE loss must not be null.");
         }
 
-        if (!Objects.equals(this.layers[this.layers.length - 1].activation, ActivationFunc.Sigmoid)) {
+        if (!(this.layers[this.layers.length - 1].activation instanceof Sigmoid)) {
             throw new IllegalArgumentException(
-                    "The layer being used to calculate BCE Loss must have its activation function set to the Sigmoid activation function (ActivationFunc.Sigmoid)."
+                    "The layer being used to calculate BCE Loss must have its activation function set to the Sigmoid activation function (Sigmoid)."
             );
         }
 

@@ -1,7 +1,6 @@
 package org.sdws.nn;
 
 import org.sdws.mathematics.*;
-import org.sdws.util.ActivationFunc;
 
 public class NetworkLayer {
     protected NArray weights;

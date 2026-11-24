@@ -3,11 +3,8 @@ package org.sdws;
 import org.sdws.mathematics.*;
 import org.sdws.nn.NetworkLayer;
 import org.sdws.nn.NeuralNetwork;
-import org.sdws.util.ActivationFunc;
 import org.sdws.util.LossAlgorithm;
 import org.sdws.visualizer.NeuralVisualizer;
-
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
