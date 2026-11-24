@@ -11,18 +11,18 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        NetworkLayer first = new NetworkLayer(3,6, ActivationFunc.ReLU);
-        NetworkLayer second = new NetworkLayer(6,4, ActivationFunc.ReLU);
-        NetworkLayer softmax = new NetworkLayer(4, 4, ActivationFunc.Softmax);
+        NetworkLayer first = new NetworkLayer(3,6, new ReLU());
+        NetworkLayer second = new NetworkLayer(6,4, new ReLU());
+        NetworkLayer softmax = new NetworkLayer(4, 4, new Softmax());
         NeuralNetwork network = new NeuralNetwork(
                 0.0001f,
                 LossAlgorithm.CCELoss,
                 first, second, softmax
         );
 
-        NetworkLayer first2 = new NetworkLayer(3,6, ActivationFunc.ReLU);
-        NetworkLayer second2 = new NetworkLayer(6,4, ActivationFunc.ReLU);
-        NetworkLayer softmax2 = new NetworkLayer(4, 4, ActivationFunc.Softmax);
+        NetworkLayer first2 = new NetworkLayer(3,6, new ReLU());
+        NetworkLayer second2 = new NetworkLayer(6,4, new ReLU());
+        NetworkLayer softmax2 = new NetworkLayer(4, 4, new Softmax());
 
         NArray wF2 = NArray.DeepCopy(first.getWeights());
         NArray wS2 = NArray.DeepCopy(second.getWeights());
